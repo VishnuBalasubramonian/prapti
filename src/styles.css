@@ -1,2 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
+.selectedAnalyticTab {
+    color: white !important;
+    background: #000066 !important;
+    border: 1px solid #000066 !important;
+    width: 100%;
+  }
 
+  .unselectedAnalyticTab {
+    color: #000066 !important;
+    background: white !important;
+    border: 1px solid #000066 !important;
+    width: 100%;
+  }
+
+  .selectedMonthlyTab {
+    color: white !important;
+    background: #000066 !important;
+    border: 1px solid #000066 !important;
+    width: 100%;
+  }
+
+  .unselectedMonthlyTab {
+    color: #000066 !important;
+    background: white !important;
+    border: 1px solid #000066 !important;
+    width: 100%;
+  }
+
+  .red-color {
+      color: red;
+  }
+
+  .green-color {
+      color: green;
+  }

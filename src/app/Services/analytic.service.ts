@@ -238,6 +238,12 @@ export class AnalyticService implements OnInit  {
     public doughnutChartData:number[] = [];
     public doughnutChartType:string = 'doughnut';
 
+    totalYearSales;
+    totalYearRent;
+    totalYearIGST;
+    totalYearPurchase;
+    totalYearOtherExpenses;
+    totalYearOutstanding;
 
     figuresModalView;
     reportList;
@@ -283,6 +289,8 @@ export class AnalyticService implements OnInit  {
 
     totalSalesAmount;
     totalSalesGSTAmount;
+    totalPOExpense;
+    totalPOExpenseGSTAmount;
 
     totalOtherExpSubTotalAmount;
     totalOtherExpGrandTotalAmount;
@@ -313,6 +321,9 @@ export class AnalyticService implements OnInit  {
     oldBalance;
     clientTotalOutstanding;
     monthKey;
+    totalYearProfit;
+    currentMargin;
+    monthlySelectedtab;
 
   constructor(public af: AngularFireDatabase, public global : Globals, public datePipe: DatePipe, public userCreation: UserCreation, public downloadLedger: DownloadLedgerService, public downloadMonthlyreport: DownloadMonthlyReportService) {
     this.global.IsAPPLICATION_ONLITNE();
@@ -349,6 +360,7 @@ export class AnalyticService implements OnInit  {
     this.totalClientRecievedAmount = 0;
     this.invoices = "";
     this.totalClientOutstandingGSTAmount = 0;
+    this.monthlySelectedtab = 'Figures';
 
     this.totalOtherExpSubTotalAmount = 0;
     this.totalOtherExpGrandTotalAmount = 0;
@@ -377,6 +389,7 @@ export class AnalyticService implements OnInit  {
     this.clientBillTDS = 0;
     this.clientBillInvoiceRecieved = 0;
     this.clientBillRemainingAmount = 0;
+    this.ResetTotalFigures();
     this.editBillInvoiceObj = {
       Key: "",
       InvoiceNumber: 0,
@@ -459,7 +472,8 @@ export class AnalyticService implements OnInit  {
     this.totalClientRecievedAmount = 0;
     this.invoices = "";
     this.totalClientOutstandingGSTAmount = 0;
-
+    this.ResetTotalFigures
+    this.monthlySelectedtab = 'Figures';
     this.totalOtherExpSubTotalAmount = 0;
     this.totalOtherExpGrandTotalAmount = 0;
     this.totalOtherExpCGSTAmount = 0;
@@ -467,8 +481,7 @@ export class AnalyticService implements OnInit  {
 
     this.totalPurchaseSubTotalAmount = 0;
     this.totalPurchaseGrandTotalAmount = 0;
-    this.totalSalesAmount = 0;
-    this.totalSalesGSTAmount = 0;
+    
     this.totalPurchaseCGSTAmount = 0;
     this.totalPurchaseSGSTAmount = 0;
     this.totalPurchaseAllTaxAmount = 0;
@@ -721,6 +734,7 @@ TotalOustanding() {
     }
   });
   self.doughnutChartData = [grandTotalSale, outstandingSale, grandTotalRent, outstandingRent];
+  invoiceObj.unsubscribe();
 });
 
 }
@@ -1523,12 +1537,7 @@ obj.unsubscribe();
     });
   }
 
-  ResetMonth(){
-    var self = this;
-    self.month = "-1";
-    self.selectedYear = (new Date().getFullYear()).toString();
-    self.GetFigures();
-  }
+ 
 
   GetClientFigures(){
     var self = this;
@@ -1565,175 +1574,98 @@ obj.unsubscribe();
     });
 
   }
-  
 
-  GetFigures(){
+  GetAllAmount1(){
     var self = this;
-    self.totalPurchaseAllGrandTotal = 0;
-    self.totalPurchaseAllTaxAmount = 0;
-    self.totalProfitAmount = 0;
-    self.totalGSTDifferenceAmount = 0;
-
-    self.ResetFiguresValues();
-
-    if(self.month != "-1" && self.selectedYear != "-1"){
-      var invoiceDB = self.af.list('/Invoice', {
-        query: {
-          orderByChild: 'Month',
-          equalTo: self.month
-        }
-      }).subscribe((result) => {
+    var salesNode = self.af.list('/AnalyticSalesWithGST/'+self.selectedYear+'/' + self.month)
+      .subscribe((result) => {
+        var salesWithGST = 0;
         if(result.length > 0){
           result.forEach(element => {
-            if(element.Date.split("/")[2] == self.selectedYear){
-              if(element.IsIGST == 1 || element.isIGST == 1){
-                self.totalIGSTSubTotalAmount += element.SubTotal;
-                self.totalIGSTGrandTotalAmount += element.GrandTotal;
-                self.totalIGSTIGSTAmount = element.SubTotal * (0.18);
-              }
-              else if(element.isRent == 0){
-                self.totalSalesSubTotalAmount += element.SubTotal;
-                self.totalSalesGrandTotalAmount += element.GrandTotal;
-                var taxAmountS = element.SubTotal * (0.18);
-                self.totalSalesCGSTAmount += Number(Number(taxAmountS/2).toFixed(2));
-                self.totalSalesSGSTAmount += Number(Number(taxAmountS/2).toFixed(2));
-              }
-              else if(element.isRent == 1){
-                self.totalRentSubTotalAmount += element.SubTotal;
-                self.totalRentGrandTotalAmount += element.GrandTotal;
-                var taxAmountR = element.SubTotal * (0.18);
-                self.totalRentCGSTAmount += Number(Number(taxAmountR/2).toFixed(2));
-                self.totalRentSGSTAmount += Number(Number(taxAmountR/2).toFixed(2));
-              }
-              var purchaseInvoiceDB = self.af.list('/PurchaseInvoice', {
-                query: {
-                  orderByChild: 'Month',
-                  equalTo: self.month
-                }
-              }).subscribe((result1) => {
-                if(result1.length > 0){
-                  result.forEach(element => {
-                    if(element.Date.split("/")[2] == self.selectedYear){
-                      self.totalPurchaseSubTotalAmount += Number(element.SubTotal);
-                      self.totalPurchaseGrandTotalAmount += Number(element.GrandTotal);
-                      var taxAmountP = Number(self.totalPurchaseSubTotalAmount) * (0.18);
-                      self.totalPurchaseCGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
-                      self.totalPurchaseSGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
-                    }
-                  });
-                }
-                var purchaseInvoiceDB = self.af.list('/OtherExpense', {
-                  query: {
-                    orderByChild: 'Month',
-                    equalTo: self.month
-                  }
-                }).subscribe((result2) => {
-                  if(result2.length > 0){
-                    self.totalOtherExpSubTotalAmount += element.SubTotal;
-                    self.totalOtherExpGrandTotalAmount += element.GrandTotal;
-                    var taxAmountO = element.SubTotal * (0.18);
-                    self.totalOtherExpCGSTAmount += Number(Number(taxAmountO/2).toFixed(2));
-                    self.totalOtherExpSGSTAmount += Number(Number(taxAmountO/2).toFixed(2));
-                  }
-                  self.totalSalesAmount = self.totalSalesGrandTotalAmount + self.totalRentGrandTotalAmount + self.totalIGSTGrandTotalAmount;
-                  self.totalSalesGSTAmount = self.totalSalesCGSTAmount + self.totalRentCGSTAmount + + self.totalRentSGSTAmount + self.totalSalesSGSTAmount + self.totalIGSTIGSTAmount;
-                  self.totalPurchaseAllGrandTotal = self.totalPurchaseGrandTotalAmount + self.totalOtherExpGrandTotalAmount;
-                  self.totalPurchaseAllTaxAmount = self.totalPurchaseCGSTAmount + self.totalPurchaseSGSTAmount + self.totalOtherExpCGSTAmount+ self.totalOtherExpSGSTAmount;
-                  self.totalProfitAmount = (self.totalSalesAmount) - (self.totalPurchaseSubTotalAmount + self.totalOtherExpGrandTotalAmount);
-                  self.totalGSTDifferenceAmount = Number(Number((self.totalSalesGSTAmount * 2) - (self.totalPurchaseCGSTAmount * 2)).toFixed(2));
-                });
-              });
+            if(element.$key == self.month){
+              salesWithGST = result[0].value;
             }
           });
         }
-        invoiceDB.unsubscribe();
+        var rentNode = self.af.list('/AnalyticRentWithGST/'+self.selectedYear+'/' + self.month).subscribe((result1) => {
+          var rentWithGST = 0;
+            if(result1.length > 0){
+              rentWithGST = result1[0].value;
+            }
+            var salesNodeNoGST = self.af.list('/AnalyticSalesWithOutGST/'+self.selectedYear+'/' + self.month).subscribe((result2) => {
+              var salesWithoutGST = 0;
+              if(result2.length > 0){
+                salesWithoutGST = result2[0].value;
+              }
+              var rentNodeNoGST = self.af.list('/AnalyticRentWithOutGST/'+self.selectedYear+'/' + self.month).subscribe((result3) => {
+                var rentWithoutGST = 0;
+                if(result3.length > 0){
+                  rentWithoutGST = result3[0].value;
+                }
+                var purchaseNode = self.af.list('/AnalyticPurchaseAmount/'+self.selectedYear+'/' + self.month).subscribe((result4) => {
+                  var purchaseWithGST = 0;
+                  if(result4.length > 0){
+                    purchaseWithGST = result4[0].value;
+                  }
+                  var purchaseNodeNoGST = self.af.list('/AnalyticPurchaseAmountWithoutGST/'+self.selectedYear+'/' + self.month).subscribe((result5) => {
+                    var purchaseWithoutGST = 0;
+                    if(result5.length > 0){
+                      purchaseWithoutGST = result5[0].value;
+                    }
+                    var otherExpNode = self.af.list('/AnalyticOtherExpAmount/'+self.selectedYear+'/' + self.month).subscribe((result6) => {
+                      var otherExpWithGST = 0;
+                      if(result6.length > 0){
+                        otherExpWithGST = result6[0].value;
+                      }
+                      var otherExpNoGST = self.af.list('/AnalyticOtherExpAmountWithoutGST/'+self.selectedYear+'/' + self.month).subscribe((result7) => {
+                        var otherExpWithoutGST = 0;
+                        if(result7.length > 0){
+                          otherExpWithoutGST = result7[0].value;
+                        }
+                        self.totalSalesSubTotalAmount = (salesWithoutGST + rentWithoutGST);
+                        self.totalSalesGrandTotalAmount = (salesWithGST + rentWithGST);
+                        var taxAmountS = Number(self.totalSalesSubTotalAmount) * (0.18);
+                        self.totalSalesCGSTAmount = Number(Number(taxAmountS/2).toFixed(2));
+                        self.totalSalesSGSTAmount = Number(Number(taxAmountS/2).toFixed(2));
+  
+                        self.totalPurchaseSubTotalAmount = purchaseWithoutGST;
+                        self.totalPurchaseGrandTotalAmount = purchaseWithGST;
+                        var taxAmountP = Number(self.totalPurchaseSubTotalAmount) * (0.18);
+                        self.totalPurchaseCGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
+                        self.totalPurchaseSGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
+  
+                        self.totalOtherExpSubTotalAmount = otherExpWithoutGST;
+                        self.totalOtherExpGrandTotalAmount = otherExpWithGST;
+                        var taxAmountO = Number(self.totalOtherExpGrandTotalAmount) * (0.18);
+                        self.totalOtherExpCGSTAmount = Number(Number(taxAmountO/2).toFixed(2));
+                        self.totalOtherExpSGSTAmount = Number(Number(taxAmountO/2).toFixed(2));
+  
+                        self.totalOtherExpTaxAmount = self.totalOtherExpCGSTAmount + self.totalOtherExpSGSTAmount;
+                        self.totalSalesTaxAmount = taxAmountS;
+                        self.totalPurchaseAllTaxAmount = taxAmountP + self.totalOtherExpTaxAmount;
+                        self.totalPurchaseAllGrandTotal = self.totalPurchaseGrandTotalAmount + self.totalOtherExpGrandTotalAmount;
+                        self.totalProfitAmount = self.totalSalesSubTotalAmount - (self.totalPurchaseSubTotalAmount + self.totalOtherExpGrandTotalAmount);
+                        self.totalGSTDifferenceAmount = Number(Number((self.totalSalesCGSTAmount * 2) - (self.totalPurchaseCGSTAmount * 2)).toFixed(2));
+                        otherExpNoGST.unsubscribe();
+                      });
+                      otherExpNode.unsubscribe();
+                    });
+                    purchaseNodeNoGST.unsubscribe();
+                  });
+                  purchaseNode.unsubscribe();
+                });
+                rentNodeNoGST.unsubscribe();
+              });
+              salesNodeNoGST.unsubscribe();
+            });
+            rentNode.unsubscribe();
+          });
+        salesNode.unsubscribe();
       });
-      // var salesNode = self.af.list('/AnalyticSalesWithGST/'+self.selectedYear+'/' + self.month).subscribe((result) => {
-      //   var salesWithGST = 0;
-      //   if(result.length > 0){
-      //     salesWithGST = result[0].value;
-      //   }
-      //   var rentNode = self.af.list('/AnalyticRentWithGST/'+self.selectedYear+'/' + self.month).subscribe((result1) => {
-      //     var rentWithGST = 0;
-      //       if(result1.length > 0){
-      //         rentWithGST = result1[0].value;
-      //       }
-      //       var salesNodeNoGST = self.af.list('/AnalyticSalesWithOutGST/'+self.selectedYear+'/' + self.month).subscribe((result2) => {
-      //         var salesWithoutGST = 0;
-      //         if(result2.length > 0){
-      //           salesWithoutGST = result2[0].value;
-      //         }
-      //         var rentNodeNoGST = self.af.list('/AnalyticRentWithOutGST/'+self.selectedYear+'/' + self.month).subscribe((result3) => {
-      //           var rentWithoutGST = 0;
-      //           if(result3.length > 0){
-      //             rentWithoutGST = result3[0].value;
-      //           }
-      //           var purchaseNode = self.af.list('/AnalyticPurchaseAmount/'+self.selectedYear+'/' + self.month).subscribe((result4) => {
-      //             var purchaseWithGST = 0;
-      //             if(result4.length > 0){
-      //               purchaseWithGST = result4[0].value;
-      //             }
-      //             var purchaseNodeNoGST = self.af.list('/AnalyticPurchaseAmountWithoutGST/'+self.selectedYear+'/' + self.month).subscribe((result5) => {
-      //               var purchaseWithoutGST = 0;
-      //               if(result5.length > 0){
-      //                 purchaseWithoutGST = result5[0].value;
-      //               }
-      //               var otherExpNode = self.af.list('/AnalyticOtherExpAmount/'+self.selectedYear+'/' + self.month).subscribe((result6) => {
-      //                 var otherExpWithGST = 0;
-      //                 if(result6.length > 0){
-      //                   otherExpWithGST = result6[0].$value;
-      //                 }
-      //                 var otherExpNoGST = self.af.list('/AnalyticOtherExpAmountWithoutGST/'+self.selectedYear+'/' + self.month).subscribe((result7) => {
-      //                   var otherExpWithoutGST = 0;
-      //                   if(result7.length > 0){
-      //                     otherExpWithoutGST = result7[0].value;
-      //                   }
-      //                   self.totalSalesSubTotalAmount = (salesWithoutGST + rentWithoutGST);
-      //                   self.totalSalesGrandTotalAmount = (salesWithGST + rentWithGST);
-      //                   var taxAmountS = Number(self.totalSalesSubTotalAmount) * (0.18);
-      //                   self.totalSalesCGSTAmount = Number(Number(taxAmountS/2).toFixed(2));
-      //                   self.totalSalesSGSTAmount = Number(Number(taxAmountS/2).toFixed(2));
-  
-      //                   self.totalPurchaseSubTotalAmount = purchaseWithoutGST;
-      //                   self.totalPurchaseGrandTotalAmount = purchaseWithGST;
-      //                   var taxAmountP = Number(self.totalPurchaseSubTotalAmount) * (0.18);
-      //                   self.totalPurchaseCGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
-      //                   self.totalPurchaseSGSTAmount = Number(Number(taxAmountP/2).toFixed(2));
-  
-      //                   self.totalOtherExpSubTotalAmount = otherExpWithoutGST;
-      //                   self.totalOtherExpGrandTotalAmount = otherExpWithGST;
-      //                   var taxAmountO = Number(self.totalOtherExpGrandTotalAmount) * (0.18);
-      //                   self.totalOtherExpCGSTAmount = Number(Number(taxAmountO/2).toFixed(2));
-      //                   self.totalOtherExpSGSTAmount = Number(Number(taxAmountO/2).toFixed(2));
-  
-      //                   self.totalOtherExpTaxAmount = self.totalOtherExpCGSTAmount + self.totalOtherExpSGSTAmount;
-      //                   self.totalSalesTaxAmount = taxAmountS;
-      //                   self.totalPurchaseAllTaxAmount = taxAmountP + self.totalOtherExpTaxAmount;
-      //                   self.totalPurchaseAllGrandTotal = self.totalPurchaseGrandTotalAmount + self.totalOtherExpGrandTotalAmount;
-      //                   self.totalProfitAmount = self.totalSalesSubTotalAmount - (self.totalPurchaseSubTotalAmount + self.totalOtherExpGrandTotalAmount);
-      //                   self.totalGSTDifferenceAmount = Number(Number((self.totalSalesCGSTAmount * 2) - (self.totalPurchaseCGSTAmount * 2)).toFixed(2));
-      //                   otherExpNoGST.unsubscribe();
-      //                 });
-      //                 otherExpNode.unsubscribe();
-      //               });
-      //               purchaseNodeNoGST.unsubscribe();
-      //             });
-      //             purchaseNode.unsubscribe();
-      //           });
-      //           rentNodeNoGST.unsubscribe();
-      //         });
-      //         salesNodeNoGST.unsubscribe();
-      //       });
-      //       rentNode.unsubscribe();
-      //     });
-      //   salesNode.unsubscribe();
-      // });
-  
-    }
-    else{
-      self.ResetFiguresValues();
-    }
   }
+  
+
+  
 
   ResetFiguresValues(){
     var self=  this;
@@ -1764,6 +1696,10 @@ obj.unsubscribe();
       self.totalRentCGSTAmount = 0;
       self.totalRentSGSTAmount = 0;
       self.totalRentTaxAmount = 0;
+      self.totalPOExpense = 0;
+      self.totalPOExpenseGSTAmount = 0;
+      this.totalSalesAmount = 0;
+      this.totalSalesGSTAmount = 0;
   }
 
   SetupLedger(){
@@ -1840,32 +1776,6 @@ obj.unsubscribe();
           self.selectedClientBills = [];
           self.ledgerBillList = [];
         }
-        // if(self.ledgerBillList.length > 0){
-        //   var ledgerBalanceNode = self.af.list('/ClientTDS',{
-        //     query: {
-        //       orderByChild: 'ClientName',
-        //       equalTo: self.selectedClient
-        //     }
-        //   }).subscribe((item) => {
-        //     if(item.length > 0){
-        //       self.ledgerBillList[0].ReceivedAmount += item[0].PreviousReceivedAmount;
-        //       self.oldBalance = item[0].OldBalance;
-        //       self.previousReceivedAmount = item[0].PreviousReceivedAmount;
-        //     }
-        //     else{
-        //       self.oldBalance = 0;
-        //       self.previousReceivedAmount = 0;
-        //     }
-        //     self.CalculateLedgerSummary();
-        //     ledgerBalanceNode.unsubscribe();
-        //   });
-        // } n
-        
-
-        // var indexVal = self.itemList.indexOf(element);
-        // //       self.itemList.splice(indexVal, 1);
-
-
         self.CalculateLedgerSummary();
        invoiceNodeObj.unsubscribe(); 
     });
@@ -2048,6 +1958,7 @@ obj.unsubscribe();
         });
         
       }
+      invoiceNode.unsubscribe();
     });
   }
 
@@ -2114,14 +2025,141 @@ obj.unsubscribe();
     }).subscribe((result) => {
       if(result.length > 0){
         self.reportList = result;
+        self.CalculateMonthlyFigures();
         self.FilterMonthlyBills();
-        
       }
       else {
         self.reportList = [];
         self.mReportDisplayList = [];
       }
       invoiceDB.unsubscribe();
+    });
+  }
+
+  CalculateMonthlyFigures() {
+    var self = this;
+    self.ResetFiguresValues();
+    self.reportList.forEach(element => {
+      if(element.isIGST == 1 || element.IsIGST == 1){
+        self.totalIGSTSubTotalAmount += Number(element.SubTotal);
+        self.totalIGSTGrandTotalAmount += Number(element.GrandTotal);
+      }
+      else if(element.isRent == 0) {
+        self.totalSalesSubTotalAmount += Number(element.SubTotal);
+        self.totalSalesGrandTotalAmount += Number(element.GrandTotal);
+      }
+      else if(element.isRent == 1) {
+        self.totalRentSubTotalAmount += Number(element.SubTotal);
+        self.totalRentGrandTotalAmount += Number(element.GrandTotal);
+      }
+      self.totalIGSTIGSTAmount = (Number(self.totalIGSTSubTotalAmount) * 0.18).toFixed(2);
+      self.totalSalesCGSTAmount = (Number(self.totalSalesSubTotalAmount) * 0.09).toFixed(2);
+      self.totalSalesSGSTAmount = (Number(self.totalSalesSubTotalAmount) * 0.09).toFixed(2);
+      self.totalRentCGSTAmount = (Number(self.totalRentSubTotalAmount) * 0.09).toFixed(2);
+      self.totalRentSGSTAmount = (Number(self.totalRentSubTotalAmount) * 0.09).toFixed(2);
+
+    });
+    self.totalSalesAmount = self.totalIGSTGrandTotalAmount + self.totalRentGrandTotalAmount + self.totalSalesGrandTotalAmount;
+    self.totalSalesGSTAmount = self.totalIGSTIGSTAmount + (self.totalSalesCGSTAmount + self.totalSalesSGSTAmount) + (self.totalRentCGSTAmount + self.totalRentSGSTAmount);
+    self.CalculatePurchaseFigures();
+  }
+
+  CalculatePurchaseFigures() {
+    var self = this;
+var pInvoiceDB = self.af.list('/PurchaseInvoice', {
+      query: {
+        orderByChild: 'Month',
+        equalTo: self.selectedReportMonth
+      }
+    }).subscribe((data) => {
+      if(data.length > 0){
+        data.forEach(element => {
+          self.totalPurchaseGrandTotalAmount += Number(element.GrandTotal);
+          self.totalPurchaseSubTotalAmount += Number(element.POAmount);
+          self.totalPurchaseCGSTAmount += (Number(element.POAmount) * 0.18);
+          self.totalPurchaseSGSTAmount += (Number(element.POAmount) * 0.18);
+        });
+        self.totalPurchaseCGSTAmount = Number(self.totalPurchaseCGSTAmount).toFixed(2);
+        self.totalPurchaseSGSTAmount = Number(self.totalPurchaseSGSTAmount).toFixed(2);
+      }
+      self.CalculateOtherExpenses();
+      pInvoiceDB.unsubscribe();
+    });
+  }
+
+  CalculateOtherExpenses() {
+    var self = this;
+var oInvoiceDB = self.af.list('/OtherExpense', {
+      query: {
+        orderByChild: 'Month',
+        equalTo: self.selectedReportMonth
+      }
+    }).subscribe((data) => {
+      if(data.length > 0){
+        data.forEach(element => {
+          self.totalOtherExpGrandTotalAmount += Number(element.GrandTotal);
+          self.totalOtherExpSubTotalAmount += Number(element.SubTotal);
+          self.totalOtherExpCGSTAmount += (Number(element.CGSTAmount) * 0.18);
+          self.totalOtherExpSGSTAmount += (Number(element.SGSTAmount) * 0.18);
+        });
+        self.totalOtherExpCGSTAmount = Number(self.totalOtherExpCGSTAmount).toFixed(2);
+        self.totalOtherExpSGSTAmount = Number(self.totalOtherExpSGSTAmount).toFixed(2);
+      }
+      self.totalPOExpense = self.totalPurchaseGrandTotalAmount + self.totalOtherExpGrandTotalAmount;
+      self.totalPOExpenseGSTAmount = (Number(self.totalPurchaseCGSTAmount) * 2) + (Number(self.totalOtherExpCGSTAmount) * 2);
+      self.totalGSTDifferenceAmount = Number(self.totalSalesGSTAmount) - Number(self.totalPOExpenseGSTAmount);
+      
+      oInvoiceDB.unsubscribe();
+    });
+  }
+
+  GetAllFigures(){
+    var self = this;
+    self.ResetTotalFigures();
+    var invoiceDB = self.af.list('/Invoice').subscribe((result) => {
+      if(result.length > 0){
+        result.forEach(element => {
+          if(element.isPerformaInvoice == 0){
+            if(element.isIGST == 1 || element.IsIGST == 1){
+              self.totalYearIGST += Number(element.GrandTotal);
+            }
+            else if(element.isRent == 0){
+              self.totalYearSales += Number(element.GrandTotal);
+            }
+            else if(element.isRent == 1){
+              self.totalYearRent += Number(element.GrandTotal);
+            }
+            self.totalYearOutstanding += Number(element.OutStandingAmount);
+          }
+        });
+      }
+      var purchaseInvoiceDB = self.af.list('/PurchaseInvoice').subscribe((result) => {
+        if(result.length > 0){
+          result.forEach(element => {
+            self.totalYearPurchase += element.GrandTotal;
+          });
+        }
+        
+        var otherExpenseDB = self.af.list('/PurchaseInvoice').subscribe((result) => {
+          if(result.length > 0){
+            result.forEach(element => {
+              self.totalYearOtherExpenses += Number(element.GrandTotal);
+            });
+          }
+          self.totalYearProfit = ((self.totalYearSales + self.totalYearRent + self.totalYearIGST) - (self.totalYearPurchase + self.totalYearOtherExpenses)).toFixed(2);
+          if(self.totalYearProfit == 0)
+            self.currentMargin = "None";
+          else if(self.totalYearProfit > 0)
+            self.currentMargin = "Profit";
+          else {
+            self.currentMargin = "Loss";
+            self.totalYearProfit *= -1;
+          }
+            
+          
+        });
+      });
+      
     });
   }
 
@@ -2159,6 +2197,22 @@ obj.unsubscribe();
         default:
           self.mReportDisplayList = [];
     }
+  }
+
+  ResetTotalFigures(){
+    this.totalYearSales = 0;
+    this.totalYearRent = 0;
+    this.totalYearIGST = 0;
+    this.totalYearPurchase = 0;
+    this.totalYearOtherExpenses = 0;
+    this.totalYearOutstanding = 0;
+    this.totalYearProfit = 0;
+    this.currentMargin = "None";
+  }
+
+  ChooseMonthlyType(selectedType){
+    var self = this;
+    self.monthlySelectedtab = selectedType;
   }
 
 }
