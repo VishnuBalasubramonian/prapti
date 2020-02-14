@@ -2060,7 +2060,7 @@ obj.unsubscribe();
 
     });
     self.totalSalesAmount = self.totalIGSTGrandTotalAmount + self.totalRentGrandTotalAmount + self.totalSalesGrandTotalAmount;
-    self.totalSalesGSTAmount = self.totalIGSTIGSTAmount + (self.totalSalesCGSTAmount + self.totalSalesSGSTAmount) + (self.totalRentCGSTAmount + self.totalRentSGSTAmount);
+    self.totalSalesGSTAmount = (Number(self.totalIGSTIGSTAmount) + (Number(self.totalSalesCGSTAmount) + Number(self.totalSalesSGSTAmount)) + (Number(self.totalRentCGSTAmount) + Number(self.totalRentSGSTAmount))).toFixed(2);
     self.CalculatePurchaseFigures();
   }
 
@@ -2106,8 +2106,8 @@ var oInvoiceDB = self.af.list('/OtherExpense', {
         self.totalOtherExpSGSTAmount = Number(self.totalOtherExpSGSTAmount).toFixed(2);
       }
       self.totalPOExpense = self.totalPurchaseGrandTotalAmount + self.totalOtherExpGrandTotalAmount;
-      self.totalPOExpenseGSTAmount = (Number(self.totalPurchaseCGSTAmount) * 2) + (Number(self.totalOtherExpCGSTAmount) * 2);
-      self.totalGSTDifferenceAmount = Number(self.totalSalesGSTAmount) - Number(self.totalPOExpenseGSTAmount);
+      self.totalPOExpenseGSTAmount = ((Number(self.totalPurchaseCGSTAmount) * 2) + (Number(self.totalOtherExpCGSTAmount) * 2)).toFixed(2);
+      self.totalGSTDifferenceAmount = (Number(self.totalSalesGSTAmount) - Number(self.totalPOExpenseGSTAmount)).toFixed(2);
       
       oInvoiceDB.unsubscribe();
     });
