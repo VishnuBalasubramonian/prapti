@@ -1,0 +1,36 @@
+<div class="row align-items-center" style="background: #000066 !important;height: 15vh !important;">
+
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: center;">
+            <button (click) = 'homeComponent.ShowAddClient()' type="button" class="btn {{homeComponent.addClient == false ? 'unselected-btn' :'selected-btn' }} " style="color:white;"><i class="ti ti-user"></i> <span>Clients</span></button>
+          </div>
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: center;">
+            <button (click) = 'homeComponent.ShowCreateBill()' type="button" class="btn {{homeComponent.createBill == false ? 'unselected-btn' :'selected-btn' }} " style="color:white;"><i class="ti ti-pencil"></i> <span>Create Bill</span></button>
+          </div>
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: center;">
+            <button (click) = 'homeComponent.ShowViewBill()' type="button" class="btn {{homeComponent.viewBill == false ? 'unselected-btn' :'selected-btn' }} " style="color:white;"><i class="ti ti-search"></i> <span>View Bill</span></button>
+          </div>
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: center;">
+            <button (click) = 'homeComponent.ShowInventory()' type="button" class="btn {{homeComponent.inventory == false ? 'unselected-btn' :'selected-btn' }} " style="color:white;"><i class="ti ti-file"></i> <span>Inventory</span></button>
+          </div>
+        
+     
+</div>
+<!-- <div class="row">
+  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+    <button type="button" class="btn" style="color:white;"> <i class="ti ti-file"></i> <span> Next Payment DueDate On: {{globals.nextPaymentDate }}</span></button>
+  </div>
+  </div> -->
+
+  <style type="text/css">
+  .unselected-btn {
+    background: #000066 !important;
+    border: 1px solid white !important;
+    color: white !important;
+}
+
+.selected-btn {
+    background: white !important;
+    border: 1px solid white !important;
+    color: #000066 !important;
+}
+  </style>

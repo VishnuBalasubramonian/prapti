@@ -1,0 +1,900 @@
+
+<div id="divViewBill" class="col-xs-12 col-sm-12 col-md-12 col-lg-12"  style="padding-bottom: 3%;">
+  <div class="row" style="padding-bottom: 0%;border-bottom: 1px solid #000066;" >
+   
+      <button (click)='ChooseAddSaleInvoice()' type="button" class="btn btn-sm {{viewBillService.isSaleInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-right:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>Sale Invoice</span></button>
+    
+      <button (click)='ChooseAddRentInvoice()' type="button" class="btn btn-sm {{viewBillService.isRentInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-bottom:0px;"><i class="ti ti-plus"></i> <span>Rent Invoice</span></button>
+ 
+      <button (click)='ChooseAddIGSTInvoice()' type="button" class="btn btn-sm {{viewBillService.isIGSTInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-left:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>IGST Invoice</span></button>
+
+      <button (click)='ChoosePurchaseInvoice()' type="button" class="btn btn-sm {{viewBillService.isPurchaseInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-left:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>Purchase Invoice</span></button> 
+
+      <button (click)='ChooseOtherInvoice()' type="button" class="btn btn-sm {{viewBillService.isOtherInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-left:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>Other Invoice</span></button> 
+    
+    </div>
+
+      <ng-container *ngIf="viewBillService.isviewGrid == true">
+          <div class="row" style="padding-top:2%;">
+            
+          </div>
+      <form id="frmViewBill" class="validate-form">
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <select [(ngModel)]="viewBillService.year" name="Year" class="form-control" required>
+                              <option value="-1">Choose the Year</option>
+                                <option value="2018">2018</option>
+                                <option value="2019">2019</option>
+                                <option value="2020">2020</option>
+                            </select>
+                            
+                          </div>
+                        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+                            <select [(ngModel)]="viewBillService.month" name="Client" class="form-control" required>
+                              <option value="-1">Choose the Month</option>
+                              <option value="01">January</option>
+                              <option value="02">February</option>
+                              <option value="03">March</option>
+                              <option value="04">April</option>
+                              <option value="05">May</option>
+                              <option value="06">June</option>
+                              <option value="07">July</option>
+                              <option value="08">August</option>
+                              <option value="09">September</option>
+                              <option value="10">October</option>
+                              <option value="11">November</option>
+                              <option value="12">December</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+
+                          <button (click)= 'SearchInvoice()' type="button" class="btn btn-block" style="color: white; background: #000066;"><span>Search</span></button>
+                        </div>
+                    </div>
+                    
+                  </div>
+            </div>
+          </div>
+        </form>
+        
+        <div >
+         <div class="row ">
+           <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <ng-container *ngIf="viewBillService.isPurchaseInvoice == false">
+             <ng-container *ngIf="((viewBillService.isSaleInvoice == true && viewBillService.isSalesEmpty == true) || (viewBillService.isRentInvoice == true && viewBillService.isRentEmpty == true) || (viewBillService.isIGSTInvoice == true && viewBillService.isIGSTEmpty == true) || (viewBillService.isPurchaseInvoice == true && viewBillService.isPurchaseEmpty == true)&& viewBillService.invoiceList.length > 0)">
+
+               <app-loading-spinner *ngIf="showSpinner"></app-loading-spinner>
+
+               <div class="row">
+                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:center;padding-top:15%;">
+                   <p style="font-size: 3rem;opacity: 0.4;"> No Invoices </p>
+                 </div>
+               </div>
+             </ng-container> 
+            
+             <ng-container *ngIf="((viewBillService.isSaleInvoice == true && viewBillService.isSalesEmpty == false) || (viewBillService.isRentInvoice == true && viewBillService.isRentEmpty == false) || (viewBillService.isIGSTInvoice == true && viewBillService.isIGSTEmpty == false) || (viewBillService.isPurchaseInvoice == true && viewBillService.isPurchaseEmpty == false)) && viewBillService.invoiceList.length > 0 && showSpinner == false && (viewBillService.month != -1)">
+
+                <div class="row">
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+                      Entries in <span style="color:#56AEE5;">Blue</span> are Performa Invoices
+                  </div> 
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+                      Entries in <span style="color:#E15757;">Red</span> are Cancelled Invoices
+                  </div> 
+                </div>
+             <ng-container *ngIf="viewBillService.invoiceList.length > 0"> 
+               <div class="pre-scrollable">
+                  <table class="table-cart">
+                      <thead style="text-align:center !important;color:white;background: #000066;font-size:11px;">
+    <tr>
+      <th style="text-align:center;">Invoice</th>
+      <th style="text-align:center;">Client</th>
+      <th style="text-align:center;">Site Name</th>
+      <th style="text-align:center;">Grand Total</th>
+      <th style="text-align:center;">Outstanding Amt</th>
+      <th style="text-align:center;">Status</th>
+      <th style="text-align:center;">Operations</th>
+    </tr>
+                      </thead>
+                      <tbody style="font-size:11px;">
+                        <tr *ngFor="let item of viewBillService.invoiceList">
+                            <ng-container *ngIf="item.isPerformaInvoice == 0 && item.IsCancelled == 0 && ((viewBillService.isSaleInvoice == true && item.IsIGST == 0 && item.isRent == 0 && item.IsPurchase == false)||(viewBillService.isIGSTInvoice == true && item.IsIGST == 1)||(viewBillService.isRentInvoice == true && item.isRent == 1) || (viewBillService.isPurchaseInvoice == true && item.IsPurchase == true)) ">
+                              <td style="text-align:center;">{{item.InvoiceNumber}}</td>
+                              <td style="text-align:left;">{{item.ClientName}}</td>
+                              <td style="text-align:center;">{{item.SiteName}}</td>
+                              <td style="text-align:right;">{{item.GrandTotal}}</td>
+                              <td style="text-align:right;">{{item.OutStandingAmount}}</td>
+                              <ng-container *ngIf="item.isPaid == 1">
+                                <td style="text-align:center;"><a style="cursor: pointer;"><span class="badge badge-success">PAID</span></a></td>
+                              </ng-container>
+                              <ng-container *ngIf="item.isPaid == 0">
+                                <td style="text-align:center;"><a style="cursor: pointer;" (click)="viewBillService.UpdateToPaid(item.Key)"><span class="badge badge-warning">NOT PAID</span></a></td>
+                              </ng-container>
+                              <td style="text-align:center;">
+                                <div class="row">
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="text-align:center;">
+                                        <a (click)="viewBillService.UpdateCurrentBill(item.Key)" data-target="#divStampVB" data-toggle="modal" title="Download Bill" style="cursor:pointer;">
+                                            <i class="ti ti-download"></i>
+                                          </a>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="text-align:center;">
+                                        <a (click)="viewBillService.EditSelectedBill(item.Key)" style="cursor:pointer;" title="Edit Bill">
+                                            <i class="ti ti-pencil"></i>
+                                          </a>
+                                    </div>
+                                    <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="text-align:center;">
+                                      <a (click)="viewBillService.DuplicateBill(item.Key)" style="cursor:pointer;" title="Duplicate Bill">
+                                          <i class="ti ti-layers"></i>
+                                        </a>
+                                  </div>
+                                </div>
+                              </td>
+                          </ng-container>
+                          
+                          <ng-container *ngIf="item.isPerformaInvoice == 1 && item.IsCancelled == 0 && ((viewBillService.isSaleInvoice == true && item.IsIGST == 0 && item.isRent == 0 && !item.IsPurchase)||(viewBillService.isIGSTInvoice == true && item.IsIGST == 1)||(viewBillService.isRentInvoice == true && item.isRent == 1) || (viewBillService.isPurchaseInvoice == true && item.IsPurchase))">
+                              <td style="text-align:center;color:#56AEE5;">{{item.InvoiceNumber}}</td>
+                              <td style="text-align:left;color:#56AEE5;">{{item.ClientName}}</td>
+                              <td style="text-align:center;color:#56AEE5;">{{item.SiteName}}</td>
+                              <td style="text-align:right;color:#56AEE5;">{{item.GrandTotal}}</td>
+                              <td style="text-align:right;color:#56AEE5;">{{item.OutStandingAmount}}</td>
+                              
+                              <td style="text-align:center;"><a (click)="viewBillService.ConvertSelectedBill(item.Key)" style="cursor: pointer;" ><span class="badge badge-info">CONVERT</span></a></td>
+    
+                              
+                              <td style="text-align:center;">
+                                <div class="row">
+                                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                        <a (click)="viewBillService.UpdateCurrentBill(item.Key)" data-target="#divStampVB" data-toggle="modal" title="Download Bill" style="cursor:pointer;">
+                                            <i class="ti ti-download"></i>
+                                          </a>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                        <a (click)="viewBillService.EditSelectedBill(item.Key)" style="cursor:pointer;" title="Edit Bill">
+                                            <i class="ti ti-pencil"></i>
+                                          </a>
+                                    </div>
+                                </div>
+                              </td>
+                          </ng-container>
+                          <ng-container *ngIf="item.IsCancelled == 1 && ((viewBillService.isSaleInvoice == true && item.IsIGST == 0 && item.isRent == 0 && !item.IsPurchase)||(viewBillService.isIGSTInvoice == true && item.IsIGST == 1)||(viewBillService.isRentInvoice == true && item.isRent == 1) || (viewBillService.isPurchaseInvoice == true && item.IsPurchase))">
+                            <td style="text-align:center;color:#E15757;">{{item.InvoiceNumber}}</td>
+                            <td style="text-align:left;color:#E15757;">{{item.ClientName}}</td>
+                            <td style="text-align:center;color:#E15757;">{{item.SiteName}}</td>
+                            <td style="text-align:right;color:#E15757;">{{item.GrandTotal}}</td>
+                            <td style="text-align:right;color:#E15757;">{{item.OutStandingAmount}}</td>
+                            
+                              <td style="text-align:center;"><a style="cursor: pointer;" ><span class="badge badge-danger">CANCELLED</span></a></td>
+                            
+                            <td style="text-align:center;">
+                              <div class="row">
+                                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                      <a (click)="viewBillService.UpdateCurrentBill(item.Key)" data-target="#divStampVB" data-toggle="modal" title="Download Bill" style="cursor:pointer;">
+                                      <!-- <a (click)="viewBillService.ViewSelectedBill(item.Key)" title="View Bill" style="cursor:pointer;"> -->
+                                          <i class="ti ti-download"></i>
+                                        </a>
+                                  </div>
+                                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                      <a style="cursor:pointer;" title="Edit Bill">
+                                          <i class="ti ti-pencil"></i>
+                                        </a>
+                                  </div>
+                              </div>
+                            </td>
+                        </ng-container>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+              </ng-container>  
+              </ng-container>
+            </ng-container>
+              <ng-container *ngIf="viewBillService.isPurchaseInvoice == true">
+                  <ng-container *ngIf="viewBillService.isPurchaseEmpty == true">
+
+                      <app-loading-spinner *ngIf="showSpinner"></app-loading-spinner>
+       
+                      <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:center;padding-top:15%;">
+                          <p style="font-size: 3rem;opacity: 0.4;"> No Invoices </p>
+                        </div>
+                      </div>
+                    </ng-container> 
+                  <ng-container *ngIf=" viewBillService.isPurchaseEmpty == false && showSpinner == false && viewBillService.month != -1">
+
+                     
+                      
+                      <table class="table-cart">
+                        <thead style="text-align:center !important;color:white;background: #000066;font-size:11px;">
+      <tr>
+        <th style="text-align:center;">Invoice Number</th>
+        <th style="text-align:center;">Client</th>
+        <th style="text-align:center;">Invoice Date</th>
+        <th style="text-align:center;">Invoice Amount</th>
+        <th style="text-align:center;">Grand Total</th>
+        <th style="text-align:center;">Operations</th>
+      </tr>
+                        </thead>
+                        <tbody style="font-size:11px;">
+                          <tr *ngFor="let items of viewBillService.purchaseRowData">
+                                <td style="text-align:center;">{{items.poNumber}}</td>
+                                <td style="text-align:left;">{{items.client}}</td>
+                                <td style="text-align:center;">{{items.PODate}}</td>
+                                <td style="text-align:center;">{{items.POAmount}}</td>
+                                <td style="text-align:right;">{{items.grandTotal}}</td>
+                               
+                               
+                                <td style="text-align:center;">
+                                  <div class="row">
+                                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                          <a (click)="viewBillService.EditPurchaseBill(items.key)" style="cursor:pointer;" title="Edit Bill">
+                                              <i class="ti ti-pencil"></i>
+                                            </a>
+                                      </div>
+                                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:center;">
+                                          <a data-target="#divRemoveConfirm" data-toggle="modal" (click)="viewBillService.SetDeletedKey(items.key)" style="cursor:pointer;" title="Remove Bill">
+                                              <i class="ti ti-close"></i>
+                                            </a>
+                                      </div>
+                                  </div>
+                                </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </ng-container>
+
+                </ng-container>
+
+                <ng-container *ngIf="viewBillService.isOtherInvoice == true">
+                    <ng-container *ngIf="viewBillService.isOtherBillEmpty == true">
+  
+                        <app-loading-spinner *ngIf="showSpinner"></app-loading-spinner>
+         
+                        <div class="row">
+                          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:center;padding-top:15%;">
+                            <p style="font-size: 3rem;opacity: 0.4;"> No Invoices </p>
+                          </div>
+                        </div>
+                      </ng-container> 
+                    <ng-container *ngIf=" viewBillService.isOtherBillEmpty == false && showSpinner == false && viewBillService.month != -1">
+  
+                       
+                        
+                        <table class="table-cart">
+                          <thead style="text-align:center !important;color:white;background: #000066;font-size:11px;">
+        <tr>
+          <th style="text-align:center;">Expense Title</th>
+          <th style="text-align:center;">Date</th>
+          <th style="text-align:center;">Grand Total</th>
+          <th style="text-align:center;">Description</th>
+          <th style="text-align:center;">Operations</th>
+        </tr>
+                          </thead>
+                          <tbody style="font-size:11px;">
+                            <tr *ngFor="let items of viewBillService.otherBillData">
+                                  <td style="text-align:center;">{{items.ExpenseTitle}}</td>
+                                  <td style="text-align:left;">{{items.Date}}</td>
+                                  <td style="text-align:center;">{{items.GrandTotal}}</td>
+                                  <td style="text-align:center;">{{items.Description}}</td>
+                                 
+                                 
+                                  <td style="text-align:center;">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:center;">
+                                            <a (click)="viewBillService.EditOtherExpenseBill(items.Key)" style="cursor:pointer;" title="Edit Bill">
+                                                <i class="ti ti-pencil"></i>
+                                              </a>
+                                        </div>
+                                    </div>
+                                  </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </ng-container>
+  
+                  </ng-container>
+         
+
+           </div>
+            
+
+    </div>
+        </div>
+      </ng-container>
+        
+
+      <ng-container *ngIf="viewBillService.isEditBill == true && viewBillService.isPurchaseInvoice == false && viewBillService.isOtherInvoice == false">
+  
+<div class="row" style="padding-top:3%;">
+  <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" style="text-align:left;">
+        <h4><span style="color:#56AEE5">{{viewBillService.editedBillObj.ClientName}}</span></h4> 
+        <span class="badge badge-default">INVOICE {{viewBillService.editedBillObj.InvoiceNumber}}</span>
+        <ng-container *ngIf="viewBillService.editedBillObj.isPaid == 1 && viewBillService.editedBillObj.IsCancelled == 0">
+            <span class="badge badge-success">PAID</span>
+        </ng-container>
+        <ng-container *ngIf="viewBillService.editedBillObj.isPaid == 0 && viewBillService.editedBillObj.IsCancelled == 0">
+            <span class="badge badge-warning">NOT PAID</span>
+        </ng-container>
+        <ng-container *ngIf="viewBillService.editedBillObj.IsCancelled == 1">
+            <span class="badge badge-danger">CANCELLED</span>
+        </ng-container>
+  </div>
+  <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="text-align:right;">
+    <button (click)="viewBillService.SaveCurrentTotal()" data-target="#divEditTotal" data-toggle="modal" type="submit" class="btn btn-sm" style="color: white; background: #000066;"> <span>Edit Total</span></button>
+      <button data-target="#divCancelBill" data-toggle="modal" type="submit" class="btn btn-sm"style="border: 1px solid #000066;color: #000066;"> <span>Cancel Bill</span></button>
+  </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="form-group">
+          <label>Invoice Date (mm/dd/yyyy)</label>
+          <input type="text" name="InvoiceDate" class="form-control" [(ngModel)]="viewBillService.editedBillObj.Date" /> 
+        </div>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="form-group">
+            <label>Outstanding Amount</label>
+            <input type="number" name="OutstandingAmt" class="form-control" [(ngModel)]="viewBillService.editedBillObj.OutStandingAmount" /> 
+          </div>
+    </div>
+  </div>
+  <div class="row">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <div class="form-group">
+            <label>DC No. </label>
+            <input type="text" name="DCNo" class="form-control" [(ngModel)]="viewBillService.editedBillObj.DCNumber" /> 
+          </div>
+      </div>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <div class="form-group">
+              <label>Site Name</label>
+              <input type="text" name="SiteName" class="form-control" [(ngModel)]="viewBillService.editedBillObj.SiteName" /> 
+            </div>
+      </div>
+      
+    </div>
+  <div class="row">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="form-group">
+          <label>Item</label>
+          <select [(ngModel)] = "viewBillService.currentItemKey" class="form-control" name="Item">
+            <option value="-1">Choose your Item</option>
+            <option *ngFor='let item of viewBillService.itemList' value="{{item.Key}}">{{item.Name}}</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <div class="form-group">
+              <label>PO Number</label>
+              <input type="text" name="PONumber" class="form-control" [(ngModel)]="viewBillService.editedBillObj.PONumber" /> 
+            </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="form-group form-submit">
+          <ng-container *ngIf="viewBillService.isRentInvoice == true">
+              <button (click)="viewBillService.ResetDurationList()" data-target="#divAddRentModal" data-toggle="modal" type="submit" class="btn btn-block" style="color: white; background: #000066;"><span>Add Item</span></button>
+          </ng-container>
+          <ng-container *ngIf="viewBillService.isRentInvoice == false">
+              <button (click) = "viewBillService.AddItem()" type="submit" class="btn btn-block" style="color: white; background: #000066;"><span>Add Item</span></button>
+          </ng-container>
+          
+        </div>
+      </div>
+    </div>
+    <ng-container *ngIf="viewBillService.editedBillObj.ItemList && viewBillService.editedBillObj.ItemList.length > 0">
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      
+        <table class="table-cart">
+            <tbody>
+              <tr style="background:#000066;color:white;">
+                <th style="text-align:center !important;">Name</th>
+                <th style="text-align:center !important;">Quantity</th>
+                <th style="text-align:center !important;">Scale</th>
+                <th style="text-align:center !important;">GST</th>
+                <th style="text-align:center !important;">Rate</th>
+                <ng-container *ngIf="viewBillService.isRentInvoice == true">
+                  <th style="text-align:center !important;">Duration/Days</th>
+                </ng-container>
+                <th style="text-align:center !important;"></th>
+              </tr>
+
+              <tr *ngFor='let selectedItem of viewBillService.editedBillObj.ItemList' style="text-align:center;">
+                <td>{{selectedItem.Name}}</td>
+                <td><a (click)="viewBillService.IncreementQuantity(selectedItem.Key)"><i class="ti ti-plus"></i></a> {{selectedItem.Quantity}} <a (click)="viewBillService.DecreementQuantity(selectedItem.Key)"><i class="ti ti-minus"></i></a></td>
+                <td><select name="Scale" value="{{selectedItem.Scale}}" (change)="viewBillService.UpdateItemScale(selectedItem.Key, $event)" class="form-control">
+  <option value="No">No</option>
+  <option value="Nos">Nos</option>
+  <option value="Month">Month</option>
+  <option value="Days">Days</option>
+  <option value="Set">Set</option>
+  <option value="Mtr">Mtr</option>
+  <option value="Kg">Kg</option>
+  <option value="Side">Side</option>
+</select></td>
+                <td>{{selectedItem.GST}}</td>
+                <ng-container *ngIf="viewBillService.isRentInvoice == true">
+                  <td><input (change)="viewBillService.UpdateItemRate(selectedItem.Key, $event)"  type="number" name= "ItemRate" class="form-control" value="{{selectedItem.RentRate}}"/>  </td>
+                </ng-container>
+                <ng-container *ngIf="viewBillService.isRentInvoice == false">
+                  <td><input (change)="viewBillService.UpdateItemRate(selectedItem.Key, $event)"  type="number" name= "ItemRate" class="form-control" value="{{selectedItem.Rate}}"/>  </td>
+                </ng-container>
+                <ng-container *ngIf="viewBillService.isRentInvoice == true">
+                <td>  <button (click)="viewBillService.CurrentItemDuration(selectedItem.Key)" data-target="#divEditDays" data-toggle="modal" type="submit" class="btn btn-sm" style="color: white; background: #000066;"><i class="ti ti-pencil"></i> <span>Edit Duration</span></button></td>
+              </ng-container>
+                <td><a (click)="viewBillService.DeleteItem(selectedItem.Key)"><i class="ti ti-close"></i></a></td>
+              </tr>
+          </table>
+    </div>
+  </div>
+  <div class="row" style="padding-top:3%;">
+      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3"></div>
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="border:1px solid black;">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">  
+              <h5>Total</h5>
+              </div>
+              </div>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="border:1px solid black;">
+                  <div class="row">
+                      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <h5>{{viewBillService.editedBillObj.SubTotal}}</h5>
+                  </div>
+                  </div>
+                </div>
+          </div>
+          <div class="row" *ngFor="let singleTax of viewBillService.editedBillObj.TaxList">
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="border:1px solid black;">
+                    <div class="row" *ngFor="let taxBreakup of singleTax.TaxBreakup">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                          {{taxBreakup.TaxBreakup}}
+                        </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="border:1px solid black;">
+                      <div class="row" *ngFor="let amount of singleTax.TaxBreakup">
+                          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            {{amount.Amount}}
+                          </div>
+                      </div>
+                    </div>
+          </div>
+      </div>
+      <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3"></div>
+  </div>
+</ng-container>
+  <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h4><span class="text-success">Grand Total: {{viewBillService.editedBillObj.GrandTotal}}</span></h4>
+      </div>
+  </div>
+  <div class="row" style="padding-bottom:4%;">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+      
+      <button data-target="#divConfirmEdit" data-toggle="modal" type="submit" class="btn" style="color: white; background: #000066;"><i class="ti ti-pencil"></i> <span>Save Changes</span></button>
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+      <button (click)="BackToSearch()" type="submit" class="btn" style="border: 1px solid #000066;color: #000066;"><i class="ti ti-search"></i> <span>Back To Search</span></button>
+    </div>
+  </div>
+
+      </ng-container>
+      <ng-container *ngIf="viewBillService.isEditBill == true && viewBillService.isPurchaseInvoice == true">
+  
+          <div class="row" style="padding-top:3%;">
+            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9" style="text-align:left;">
+                  <h4><span style="color:#56AEE5">{{viewBillService.purchaseItem.ClientName}}</span></h4> 
+                 
+            </div>
+            
+          </div>
+          
+          <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <div class="form-group">
+                      <label>Invoice Number</label>
+                      <input type="text" name="PONumber" class="form-control" [(ngModel)]="viewBillService.purchaseItem.PONumber" /> 
+                    </div>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <div class="form-group">
+                  <label>Invoice Date (yyyy-mm-dd)</label>
+                  <input type="date" name="PODate" class="form-control" [(ngModel)]="viewBillService.purchaseItem.PODate" /> 
+                </div>
+            </div>
+            </div>
+            <div class="row">
+                
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                    <div class="form-group">
+                        <label>Invoice Amount</label>
+                        <input type="number" name="POAmount" class="form-control" [(ngModel)]="viewBillService.purchaseItem.POAmount" /> 
+                      </div>
+                </div>
+                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <div class="form-group">
+                    <label>Invoice GST Amount</label>
+                    <input type="number" name="POGSTAmount" class="form-control" [(ngModel)]="viewBillService.purchaseItem.POGSTAmount" /> 
+
+                  </div>
+                </div>
+              </div>
+                         
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                  <h4><span class="text-success">Grand Total: {{viewBillService.purchaseItem.POGSTAmount + viewBillService.purchaseItem.POAmount}}</span></h4>
+                </div>
+            </div>
+            <div class="row" style="padding-bottom:4%;">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+                
+                <button data-target="#divConfirmEdit" data-toggle="modal" type="submit" class="btn" style="color: white; background: #000066;"><i class="ti ti-pencil"></i> <span>Save Changes</span></button>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+                <button (click)="BackToSearch()" type="submit" class="btn" style="border: 1px solid #000066;color: #000066;"><i class="ti ti-search"></i> <span>Back To Search</span></button>
+              </div>
+            </div>
+          
+                </ng-container>
+                <ng-container *ngIf="viewBillService.isEditBill == true && viewBillService.isOtherInvoice == true">
+
+                  <form id="frmAddOtherInvoice" class="validate-form" style=" padding-top: 12px;" #frmAddOtherInvoice="ngForm" >
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Expense Title*</label>
+            <input [(ngModel)]="viewBillService.otherExpense.ExpenseTitle" name="ExpenseTitle" type="text" class="form-control"  required #expensetitle="ngModel"/>
+            <div *ngIf="!expensetitle.valid && expensetitle.touched" class="alert alert-danger">
+                <div *ngIf="expensetitle.hasError('required') && expensetitle.touched">Expense Title is required</div>
+              </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <label>Date* (mm/dd/yyyy)</label>
+              <input [(ngModel)]="viewBillService.otherExpense.Date" name="Date" type="text" class="form-control"  required #expensedate="ngModel"/>
+              <div *ngIf="!expensedate.valid && expensedate.touched" class="alert alert-danger">
+                  <div *ngIf="expensedate.hasError('required') && expensedate.touched">Date is required</div>
+                </div>
+            </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>CGST Amount*</label>
+            <input (change)="viewBillService.CalculateGrandTotal()" [(ngModel)]="viewBillService.otherExpense.CGSTAmount" name="CGSTAmount" type="number" class="form-control"   required #cgstAmount="ngModel"/>
+            <div *ngIf="!cgstAmount.valid && cgstAmount.touched" class="alert alert-danger">
+                <div *ngIf="cgstAmount.hasError('required') && cgstAmount.touched">CGST Amount is required</div>
+              </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>SGST Amount*</label>
+            <input (change)="viewBillService.CalculateGrandTotal()" [(ngModel)]="viewBillService.otherExpense.SGSTAmount" name="SGSTAmount" type="number" class="form-control"   required #sgstAmount="ngModel"/>
+            <div *ngIf="!sgstAmount.valid && sgstAmount.touched" class="alert alert-danger">
+                <div *ngIf="sgstAmount.hasError('required') && sgstAmount.touched">SGST Amount is required</div>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Sub Total*</label>
+            <input (change)="viewBillService.CalculateGrandTotal()" [(ngModel)]="viewBillService.otherExpense.SubTotal" name="SubTotal" type="number" class="form-control"   required #subtotalAmt="ngModel"/>
+            <div *ngIf="!subtotalAmt.valid && subtotalAmt.touched" class="alert alert-danger">
+                <div *ngIf="subtotalAmt.hasError('required') && subtotalAmt.touched">Sub Total is required</div>
+              </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Grand Total</label>
+            <input [(ngModel)]="viewBillService.otherExpense.GrandTotal" name="GrandTotal" type="number" class="form-control" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <textarea class="form-control" name="Description" [(ngModel)]="viewBillService.otherExpense.Description" >
+
+            </textarea>
+            </div>
+        </div>
+      </div>
+      <div class="row" style="padding-bottom:4%;">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+            
+            <button data-target="#divConfirmEdit" data-toggle="modal" type="submit" class="btn" style="color: white; background: #000066;"><i class="ti ti-pencil"></i> <span>Save Changes</span></button>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+            <button (click)="BackToSearch()" type="submit" class="btn" style="border: 1px solid #000066;color: #000066;"><i class="ti ti-search"></i> <span>Back To Search</span></button>
+          </div>
+        </div>
+    </form>
+   </ng-container>
+
+
+ </div>
+      
+
+      <div class="modal fade" id="divStampVB" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header" style="text-align: center;">
+              <h4 class="modal-title" id="myModalLabel">Do you need the stamp?</h4>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+            </div>
+            <div class="modal-body">
+              <input type="checkbox" name="isStamp" [(ngModel)] = "isStamp" />Yes, I need the Stamp 
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn" data-dismiss="modal" style="border: 1px solid #000066;color: #000066;">Cancel</button>
+              <button data-dismiss="modal" (click)='DownloadInvoice()' type="button" class="btn" style="color: white; background: #000066;">Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="divPaid" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header" style="text-align: center;">
+                <h4 class="modal-title" id="myModalLabel">Are you sure it is Paid?</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn"  data-dismiss="modal" style="border: 1px solid #000066;color: #000066;">No</button>
+                <button data-dismiss="modal" (click)='DownloadInvoice()' type="button" class="btn" style="color: white; background: #000066;">Yes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+
+        <div class="modal fade" id="divConfirmEdit" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header" style="text-align: center;">
+                <h4 class="modal-title" id="myModalLabel">Are you sure to save your changes?</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn" data-dismiss="modal" style="border: 1px solid #000066;color: #000066;">No</button>
+                <button data-dismiss="modal" (click)='viewBillService.SaveChanges()' type="button" class="btn" style="color: white; background: #000066;">Yes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="divCancelBill" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                  <h4 class="modal-title" id="myModalLabel">Are you sure to Cancel this Invoice?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" data-dismiss="modal" style="border: 1px solid #000066;color: #000066;">No</button>
+                  <button data-dismiss="modal" (click)="viewBillService.CancelBill()" type="button" class="btn" style="color: white; background: #000066;">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal fade" id="divEditTotal" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                  <h4 class="modal-title" id="myModalLabel">Edit Invoice Total</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+                </div>
+                <div class="modal-body">
+                  <div class="row">
+                      <table class="table-cart">
+                          <thead>
+                            <tr>
+                              <th>Item</th>
+                              <th>Rate</th>
+                              <th>Qty</th>
+                              <th>Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr *ngFor="let item of viewBillService.editedBillObj.ItemList">
+                              <td>{{item.Name}}</td>
+                              <ng-container *ngIf="viewBillService.isRentInvoice == true">
+                                <td><input type="text" class="form-control" value="{{item.RentRate}}" (change)="viewBillService.UpdateItemRentRate(item.Key, $event)" /></td>
+                              </ng-container>
+                              <ng-container *ngIf="viewBillService.isSaleInvoice == true || viewBillService.isIGSTInvoice == true">
+                                <td>{{item.Rate}}</td>
+                              </ng-container>
+                              
+                              <td>{{item.Quantity}}</td>
+                              <td><input type="text" class="form-control" value="{{item.Amount}}" (change)="viewBillService.UpdateItemAmount(item.Key, $event)" /></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <h4 style="text-align: center;">{{viewBillService.editedBillObj.SubTotal}}</h4>
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <h3 class="text-success" style="text-align: center;">{{viewBillService.editedBillObj.GrandTotal}}</h3>  
+                    </div>
+                    
+                      
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" (click)="viewBillService.ResetTotal()" class="btn" style="border: 1px solid #000066;color: #000066;" data-dismiss="modal">Cancel</button>
+                  <button data-dismiss="modal" (click)="viewBillService.SaveChanges()" type="button" class="btn" style="color: white; background: #000066;">Save</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        
+
+        
+          <div class="modal fade" id="divEditDays" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                  <h4 class="modal-title" id="myModalLabel">Please Enter the Rent Details</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                  <label>Enter the Duration</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                                    <input [(ngModel)]="viewBillService.currentFromDate"  class="form-control" type="date" name="RentDurationFrom" />
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                                    <input [(ngModel)]="viewBillService.currentToDate"  class="form-control" type="date" name="RentDurationTo" />
+                                </div>
+                            </div>
+                            <!-- <div *ngIf="createBillService.datepickerError != ''" class="alert alert-danger" >
+                               {{createBillService.datepickerError}}
+                              </div> -->
+                        </div>
+                        <div class="form-group">
+                            <button (click)='viewBillService.AddDuration()' type="button" class="btn btn-block" style="color: white; background: #000066;">Add Duration</button>
+                        </div>
+                        </div>
+                      </div>
+                      <ng-container *ngIf="viewBillService.isRentInvoice == true">
+                      <ng-container *ngIf="viewBillService.currentDuration && viewBillService.currentDuration.length > 0">
+                        <table class="table-cart">
+                            <tbody>
+                            <tr style="background: #000066;color:white;">
+                            <td>From</td>
+                              <td>To</td>
+                              <td>Operations</td>
+                              </tr>
+                            <tr *ngFor="let rentDuration of viewBillService.currentDuration">
+                                <td>{{rentDuration.fromDate}}</td>
+                                <td>{{rentDuration.toDate}}</td>
+                                <td><a (click)="viewBillService.RemoveDuration(rentDuration.indexValue)"><i class="ti ti-close"></i></a></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </ng-container>
+                    </ng-container>
+                  
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" data-dismiss="modal"  style="border: 1px solid #000066;color: #000066;">Cancel</button>
+                  <button data-dismiss="modal" (click)='viewBillService.EditItem()' type="button" class="btn" style="color: white; background: #000066;" [disabled]="!(viewBillService.currentDuration && viewBillService.currentDuration.length > 0) "> Edit</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal fade" id="divAddRentModal" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                  <h4 class="modal-title" id="myModalLabel">Please Enter the Rent Details</h4>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                  <label>Enter the Duration</label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                                    <input [(ngModel)]="viewBillService.currentNewFromDate"  class="form-control" type="date" name="RentDurationFrom" />
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                                    <input [(ngModel)]="viewBillService.currentNewToDate"  class="form-control" type="date" name="RentDurationTo" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button (click)='viewBillService.AddNewDuration()' type="button" class="btn btn-block" style="color: white; background: #000066;">Add Duration</button>
+                        </div>
+                        </div>
+                      </div>
+                      <ng-container *ngIf="viewBillService.currentRentDurationDays && viewBillService.currentRentDurationDays.length > 0">
+                        <table class="table-cart">
+                            <tbody>
+                            <tr style="background:black;color:white;">
+                            <td>From</td>
+                              <td>To</td>
+                              <td>Operations</td>
+                              </tr>
+                            <tr *ngFor="let rentDuration of viewBillService.currentRentDurationDays">
+                                <td>{{rentDuration.fromDate}}</td>
+                                <td>{{rentDuration.toDate}}</td>
+                                <td><a (click)="viewBillService.RemoveDuration(rentDuration.indexValue)"><i class="ti ti-close"></i></a></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </ng-container>
+                  <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                      <div class="form-group">
+                        <label>Number of Days in Total</label>
+                        <input type="number" [(ngModel)]="viewBillService.currentTotalNoOfDays" name="NumberOfDays" class="form-control" />
+                      </div>
+                    </div>
+                  </div> 
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" style="border: 1px solid #000066;color: #000066;" data-dismiss="modal">Cancel</button>
+                  <button style="color: white; background: #000066;" data-dismiss="modal" (click)='viewBillService.AddItem()' type="button" class="btn" > Add</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal fade" id="divRemoveConfirm" role="dialog">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header" style="text-align: center;">
+                  <h4 class="modal-title" id="myModalLabel">Are you sure to Delete this Invoice?</h4>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn" style="border: 1px solid #000066;color: #000066;" data-dismiss="modal">No</button>
+                  <button style="color: white; background: #000066;" data-dismiss="modal" (click)="viewBillService.DeletePurchaseBill()" type="button" class="btn">Yes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <style type="text/css">
+
+            .unselected-btn {
+              background: white !important;
+              border: 1px solid #000066 !important;
+              color: #000066 !important;
+          }
+          
+          .selected-btn {
+              background: #000066 !important;
+              border: 1px solid #000066 !important;
+              color: white !important;
+          }
+            </style>

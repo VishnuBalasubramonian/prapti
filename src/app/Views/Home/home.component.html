@@ -1,0 +1,140 @@
+<div id="home">
+  
+    <ng-container *ngIf="!(authService.user | async)">
+      <app-login></app-login>
+    </ng-container>
+
+    <ng-container *ngIf="authService.user | async">
+      <ng-container *ngIf="authService.user | async">
+        <div class="row align-items-center">
+          <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" style="border-right: 1px solid #000066;">
+
+            <navigation-pane></navigation-pane>
+
+          </div>
+          <!--<div class="col-xs-2 col-sm-2 col-md-2 col-lg-2" style="text-align:left;">
+          <h4 *ngIf="authService.user | async" style="color:white">Welcome {{ (authService.user | async)?.email }} </h4>
+      </div>-->
+
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+                <h4 style="font-family: Oswald;">Welcome Anand</h4>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+                <button *ngIf="authService.user | async" (click)='Logout()' type="button" class="btn btn-sm" style="color:#000066 !important;border: 1px solid #000066 !important;"><i class="ti ti-power-off"></i> <span>LogOut</span></button>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      </ng-container>
+      <div class="row">
+        <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8" style="text-align:center;background:#fafafa;font-family: Oswald;">
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:center;padding-left:0px;padding-right:0px;">
+              <ng-container *ngIf="userCreation.isValid == false || inventoryService.isValid == false || createBillService.isValid == false">
+                <div class="alert alert-danger" role="alert">
+                  {{userCreation.errorMsg || inventoryService.errorMsg || createBillService.errorMsg}}
+                </div>
+              </ng-container>
+              <ng-container *ngIf="userCreation.isAdded == true">
+                <div class="alert alert-success" role="alert">
+                  Client has been Added Successfully
+                </div>
+              </ng-container>
+              <ng-container *ngIf="inventoryService.isAdded == true">
+                <div class="alert alert-success" role="alert">
+                  Item has been Added Successfully
+                </div>
+              </ng-container>
+              <ng-container *ngIf="userCreation.isEdited == true">
+                <div class="alert alert-success" role="alert">
+                  Client has been Edited Successfully
+                </div>
+              </ng-container>
+              <ng-container *ngIf="inventoryService.isEdited == true">
+                <div class="alert alert-success" role="alert">
+                  Item has been Edited Successfully
+                </div>
+              </ng-container>
+              <ng-container *ngIf="createBillService.isAdded == true">
+                <div class="alert alert-success" role="alert">
+                  {{createBillService.successMsg}}
+                </div>
+              </ng-container>
+
+            </div>
+          </div>
+          <div class="row" style="padding-top:3%;">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <ng-container *ngIf='addClient == true'>
+                <add-client></add-client>
+              </ng-container>
+              <ng-container *ngIf='createBill == true'>
+                <create-bill></create-bill>
+              </ng-container>
+              <ng-container *ngIf='viewBill == true'>
+                <view-bills></view-bills>
+              </ng-container>
+              <ng-container *ngIf='inventory == true'>
+                <inventory></inventory>
+              </ng-container>
+              <ng-container *ngIf='email == true'>
+                <emial></emial>
+              </ng-container>
+            </div>
+          </div>
+
+        </div>
+        <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" style="border-left:1px solid black;">
+          <analytics></analytics>
+        </div>
+      </div>
+
+    </ng-container>
+    
+</div>
+<div class="row" style="padding-top:1%;padding-bottom:1%;background:#000066;color: white;text-align: right;">
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+      <label style="color:white;text-align:right;font-family:Oswald;">© ALL RIGHTS RESERVED, 2018 | HashNaN</label>
+      
+    </div>
+    <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+        <label style="color:white;text-align:right;font-family:Oswald;"><a href="https://www.hashnan.com/" target="_blank">www.hashnan.com</a></label>
+    </div>
+  </div>
+
+<style type="text/css">
+@font-face {
+  font-family: 'lato-light';
+  src: url('../../assets/fonts/Lato-Regular.ttf');
+}
+
+.lato-font {
+  font-family: 'lato-light' !important;
+}</style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

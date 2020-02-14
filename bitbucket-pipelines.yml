@@ -1,0 +1,30 @@
+# This is a sample build configuration for JavaScript.
+# Check our guides at https://confluence.atlassian.com/x/14UWN for more examples.
+# Only use spaces to indent your .yml configuration.
+# ------ npm install
+                #  - npm build
+                #  - npm rebuild node-sass
+                #  - npm install -g @angular/cli@1.7.2
+# You can specify a custom docker image from Docker Hub as your build environment.
+#- ls -laR ./dist #recursively list directories
+          #- npm install -g firebase-tools
+          #- firebase deploy --token=$FIREBASE_TOKEN --project #fedoui --non-interactive
+       # artifacts:
+            # - dist/**
+image: node:8.12.0
+
+pipelines:
+  branches:
+   master: #master branch
+    - step:
+        deployment: test
+        caches:
+             - node
+        script: # Modify the commands below to build your repository.
+                  - npm install
+                  - npm build
+                  - npm rebuild node-sass
+                  - npm install -g @angular/cli
+                  - ng build --prod
+          
+

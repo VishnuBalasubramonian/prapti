@@ -1,0 +1,155 @@
+<div id="divAddInventory" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <div class="row" style="padding-bottom: 0%;border-bottom: 1px solid #000066;">
+      <button (click)='ChooseAddInventory()' type="button" class="btn btn-sm {{isAddInventory == false ? 'unselected-btn' :'selected-btn' }}" style="border-right:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>Add Inventory</span></button>
+      <button (click)='ChooseEditInventory()' type="button" class="btn btn-sm {{isEditInventory == false ? 'unselected-btn' :'selected-btn' }}" style="border-bottom:0px;"><i class="ti ti-pencil"></i> <span>Edit Inventory</span></button>
+  </div>
+  <ng-container *ngIf="isAddInventory == true">
+    <form id="frmAddInventory" class="validate-form" style=" padding-top: 12px;" #addInventoryForm="ngForm">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Name*</label>
+            <input [(ngModel)]="inventoryService.inventoryObj.Name" name="InventoryName" type="text" class="form-control" required #name="ngModel">
+            <div *ngIf="!name.valid && name.touched" class="alert alert-danger">
+                <div *ngIf="name.hasError('required') && name.touched">Name is required</div>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>HSN Code*</label>
+            <input [(ngModel)]="inventoryService.inventoryObj.HSNCode" name="HSN_Code" type="text" class="form-control" required #hsn="ngModel">
+            <div *ngIf="!hsn.valid && hsn.touched" class="alert alert-danger">
+                <div *ngIf="hsn.hasError('required') && hsn.touched">HSN Code is required</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Rate</label>
+            <input [(ngModel)]="inventoryService.inventoryObj.Rate" name="Rate" type="text" class="form-control" pattern="^[0-9]\d*(\.\d+)?$" #rate="ngModel">
+            <div *ngIf="!rate.valid && rate.touched" class="alert alert-danger">
+               
+               <div *ngIf="rate.hasError('pattern') && rate.touched">Please Enter a Valid Rate</div>
+            </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>GST(%)*</label>
+            <input [(ngModel)]="inventoryService.inventoryObj.GST" name="GST" type="text" class="form-control" required pattern="(^\s*\d+(\.\d+)?\d*)(%)?\s*$" #gst="ngModel">
+            <div *ngIf="!gst.valid && gst.touched" class="alert alert-danger">
+                <div *ngIf="gst.hasError('required') && gst.touched">GST(%) is required</div>
+               <div *ngIf="gst.hasError('pattern') && gst.touched">Please Enter a Valid GST(%)</div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Rent Rate (per day cost)</label>
+                <input [(ngModel)]="inventoryService.inventoryObj.RentRate" name="RentRate" type="text" class="form-control">
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6"></div>
+        </div>
+      </div>
+      <div class="form-group form-submit">
+          <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <button (click)="inventoryService.saveItemInformation();" class="btn btn-block" style="color: white; background: #000066;" [disabled]="!addInventoryForm.form.valid"><span>Add Item</span></button>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <button (click)="addInventoryForm.resetForm()" style="border: 1px solid #000066;color: #000066;" class="btn btn-block"><span>Clear</span></button>
+              </div>
+            </div>
+      </div>
+    </form>
+  </ng-container>
+  <ng-container *ngIf="isEditInventory == true">
+    <form style=" padding-top: 12px;"  #editInventoryForm="ngForm">
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
+            <select name="Client_Name" [(ngModel)]="inventoryService.itemID" class="form-control">
+              <option value="-1">Choose your Item</option>
+              <option *ngFor="let item of inventoryService.itemList" value="{{item.Key}}">{{item.Name}}</option>
+            </select>
+          </div>
+          <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+            <button class="btn btn-block" (click)="inventoryService.GetItemInformation()" style="color: white; background: #000066;"><span>View</span></button>
+          </div>
+        </div>
+      </div>
+      <ng-container *ngIf='inventoryService.showItemInfo == true'>
+        <div class="form-group">
+          <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <label>Name*</label>
+              <input [(ngModel)]="inventoryService.itemInfo.Name" name="ItemName" type="text" class="form-control" required #name="ngModel">
+              <div *ngIf="!name.valid && name.touched" class="alert alert-danger">
+                  <div *ngIf="name.hasError('required') && name.touched">Name is required</div>
+              </div>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <label>HSN Code*</label>
+              <input [(ngModel)]="inventoryService.itemInfo.HSNCode" name="HSNCode" type="text" class="form-control" required #hsn="ngModel">
+              <div *ngIf="!hsn.valid && hsn.touched" class="alert alert-danger">
+                  <div *ngIf="hsn.hasError('required') && hsn.touched">HSN Code is required</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-group">
+          <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <label>Rate</label>
+              <input [(ngModel)]="inventoryService.itemInfo.Rate" name="Rate" type="text" class="form-control"  pattern="^[0-9]\d*(\.\d+)?$" #rate="ngModel">
+              <div *ngIf="!rate.valid && rate.touched" class="alert alert-danger">
+                
+                 <div *ngIf="rate.hasError('pattern') && rate.touched">Please Enter a Valid Rate</div>
+              </div>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <label>GST(%)*</label>
+              <input [(ngModel)]="inventoryService.itemInfo.GST" name="GST" type="text" class="form-control" required pattern="(^\s*\d+(\.\d+)?\d*)(%)?\s*$" #gst="ngModel">
+              <div *ngIf="!gst.valid && gst.touched" class="alert alert-danger">
+                  <div *ngIf="gst.hasError('required') && gst.touched">GST(%) is required</div>
+                 <div *ngIf="gst.hasError('pattern') && gst.touched">Please Enter a Valid GST(%)</div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <label>Rent Rate (per day cost)</label>
+                  <input [(ngModel)]="inventoryService.itemInfo.RentRate" name="RentRate" type="text" class="form-control">
+              </div>
+            </div>
+        </div>
+        <div class="form-group">
+          <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <button (click)="inventoryService.EditInventoryInformation()" class="btn btn-block" style="color: white; background: #000066;" [disabled]="!editInventoryForm.form.valid"><span>Save</span></button>
+            </div>
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <button (click)="inventoryService.CancelEdit()" class="btn btn-block" style="border: 1px solid #000066;color: #000066;"><span>Cancel</span></button>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+    </form>
+  </ng-container>
+</div>
+<style type="text/css">
+
+  .unselected-btn {
+    background: white !important;
+    border: 1px solid #000066 !important;
+    color: #000066 !important;
+}
+
+.selected-btn {
+    background: #000066 !important;
+    border: 1px solid #000066 !important;
+    color: white !important;
+}
+  </style>

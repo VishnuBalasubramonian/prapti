@@ -1,0 +1,799 @@
+
+
+<div id="divCreateBill" class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+  <div class="row" style="padding-bottom: 0%;border-bottom: 1px solid #000066;" >
+  
+    <button (click)='ChooseAddSaleInvoice()' type="button" class="btn btn-sm {{createBillService.isSaleInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-right:0px;border-bottom:0px;"><i class="ti ti-plus"></i> <span>Sale Invoice</span></button>
+
+    <button (click)='ChooseAddRentInvoice()' type="button" class="btn btn-sm {{createBillService.isRentInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-bottom:0px;"><i class="ti ti-plus"></i> <span>Rent Invoice</span></button>
+
+        <button (click)='ChooseAddPurchaseInvoice()' type="button" class="btn btn-sm {{createBillService.isPurchaseInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-bottom:0px;"><i class="ti ti-plus"></i> <span>Purchase Invoice</span></button>
+        <button (click)='ChooseAddOtherInvoice()' type="button" class="btn btn-sm {{createBillService.isOtherInvoice == false ? 'unselected-btn' :'selected-btn' }}" style="border-bottom:0px;"><i class="ti ti-plus"></i> <span>Other Invoice</span></button>
+
+  </div>
+  <ng-container *ngIf="createBillService.isAdded == false">
+    <ng-container *ngIf="createBillService.isSaleInvoice == true">
+
+      <div class="row" style="padding-top:2%;">
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align:left">
+          <input (change)="createBillService.CalculateSubTotal()" [(ngModel)]="createBillService.isIGSTBill" type="checkbox" name="IsIGST" /><label class="text-info">Click here for IGST</label>
+        </div>
+        <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
+          
+        </div>
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align:right">
+          <button data-target="#divResetModal" data-toggle="modal" type="button" class="btn btn-sm" style="color: #000066; border: 1px solid #000066;"><span>Reset Values</span></button>
+        </div>
+      </div>
+      <form id="frmBill" class="validate-form">
+        <div class="row">
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div class="form-group">
+              <label>Bill Type</label>
+              <select name="BillType" [(ngModel)]="createBillService.billType" class="form-control">
+                <option value="-1">Choose the Bill Type</option>
+                <option value="1">Invoice</option>
+                <option value="2">Performa Invoice</option>
+              </select>
+            </div>
+          </div>
+          <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+            <div class="form-group">
+              <label>Client</label>
+              <select (change)="createBillService.GetClientInfo()" name="ChosenClient" [(ngModel)]="createBillService.clientKey" class="form-control" name="Client">
+                <option value="-1">Choose your Client</option>
+                <option *ngFor='let client of createBillService.clientList' value="{{client.Key}}">{{client.Name}}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <form id="frmAddItem" class="validate-form">
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <div class="form-group">
+                <label>Item</label>
+                <select [(ngModel)]="createBillService.currentItemKey" class="form-control" name="Item">
+                  <option value="-1">Choose your Item</option>
+                  <option *ngFor='let item of createBillService.itemList' value="{{item.Key}}">{{item.Name}}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <div class="form-group form-submit">
+                <button (click)="createBillService.AddItem()" type="submit" class="btn btn-block" style="color: white; background: #000066;"><span>Add Item</span></button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </form>
+      <ng-container *ngIf="createBillService.isClientSelected == true">
+        <div class="row" style="border-top: 0.5px solid #000066;">
+          <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9" style="text-align: left;">
+              <h4 style="font-family: Oswald;font-style: italic;padding-top: 3%;">
+                  Billed to - {{createBillService.billObj.ClientName}} 
+              </h4>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: right;">
+                <label style="padding-top: 3%;" [(ngModel)]="createBillService.todayDate">{{today | date: 'dd/MM/yyyy'}}</label>
+            </div>
+          </div>
+            <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: left;;">
+                <label style="font-family: Oswald;font-style: italic;">
+                    <strong>Party's GST:</strong> <i>{{createBillService.billObj.ClientGSTNmber}}</i>
+                  </label>
+              </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <div class="form-group">
+                  <label>DC Number</label>
+                  <input [(ngModel)]="createBillService.DCNum" type="text" class="form-control" name="DC_No" value="0" />
+                </div>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <div class="form-group">
+                    <label>PO/WO Number</label>
+                    <input [(ngModel)]="createBillService.POWONum" type="text" name="PO_WO_Number" class="form-control"/>
+                  </div>
+                </div>
+        </div>
+            <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group">
+                  <label>Site Name</label>
+                  <textarea type="text" [(ngModel)]="createBillService.SiteName" name="SiteName" class="form-control"></textarea>
+                </div>  
+                </div>
+                </div>
+
+
+
+
+        <!-- <div class="row">
+          <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7" style="text-align:left;">
+            <i>Bill To,</i>
+
+            <h4>{{createBillService.billObj.ClientName}}</h4>
+            <h6>{{createBillService.billObj.ClientAddressLine1}}</h6>
+
+            <h6>{{createBillService.billObj.ClientAddressLine2}}</h6>
+
+            <h6>{{createBillService.billObj.ClientCity}}, {{createBillService.billObj.ClientPincode }}</h6>
+          </div>
+          <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+            <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="border-bottom:1px solid black;">
+                <strong>GSTIN: {{createBillService.billObj.GSTNumber}}</strong>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+                Date
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+                <label [(ngModel)]="createBillService.todayDate">{{today | date: 'dd/MM/yyyy'}}</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+                DC No.
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+                <input [(ngModel)]="createBillService.DCNum" type="text" name="DC_No" value="0" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+                Site Name
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+                <textarea [(ngModel)]="createBillService.SiteName" name="SiteName"> </textarea>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+                Party's GST No.
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+                {{createBillService.billObj.ClientGSTNmber}}
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid black;border-right:1px solid black;">
+                PO/WO Number
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+                <input [(ngModel)]="createBillService.POWONum" type="text" name="PO_WO_Number" />
+              </div>
+            </div>
+          </div>
+        </div> -->
+      </ng-container>
+      <ng-container *ngIf="createBillService.selectedItemList.length > 0">
+        <div class="row">
+          <table class="table-cart">
+            <tbody>
+              <tr style="background: #000066;color:white;">
+                <th style="text-align:center !important;">Name</th>
+                <th style="text-align:center !important;">Quantity</th>
+                <th style="text-align:center !important;">Scale</th>
+                <th style="text-align:center !important;">HSN Code</th>
+                <th style="text-align:center !important;">GST</th>
+                <th style="text-align:center !important;">Rate</th>
+                <th style="text-align:center !important;"></th>
+              </tr>
+              <tr *ngFor='let selectedItem of createBillService.selectedItemList' style="text-align:center;">
+                <td>{{selectedItem.Name}}</td>
+                <td><a (click)="IncreementQuantity(selectedItem.Key)"><i class="ti ti-plus"></i></a> {{selectedItem.Quantity}} <a (click)="DecreementQuantity(selectedItem.Key)"><i class="ti ti-minus"></i></a></td>
+                <td><select name="Scale" (change)="createBillService.UpdateItemScale(selectedItem.Key, $event)" class="form-control">
+  <option value="No">No</option>
+  <option value="Nos">Nos</option>
+  <option value="Month">Month</option>
+  <option value="Days">Days</option>
+  <option value="Set">Set</option>
+  <option value="Mtr">Mtr</option>
+  <option value="Kg">Kg</option>
+  <option value="Kg">Kg</option>
+  <option value="Side">Side</option>
+</select></td>
+                <td>{{selectedItem.HSNCode}}</td>
+                <td>{{selectedItem.GST}}</td>
+                <td><input (change)="createBillService.UpdateItemRate(selectedItem.Key, $event)" type="number" name="ItemRate" class="form-control" value="{{selectedItem.Rate}}" />  </td>
+                <td><a (click)="DeleteItem(selectedItem.Key)"><i class="ti ti-close"></i></a></td>
+              </tr>
+          </table>
+        </div>
+        <div class="row" style="padding-top:3%">
+          <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5" style="padding-top:5%;background:#000066;color:white;">
+            {{createBillService.GrandTotalInWords}}
+          </div>
+          <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
+            <div class="row" style="border-bottom:1px solid black;padding-top:5%;background:#000066;color:white;">
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h6>HSN/SAC</h6>
+              </div>
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h6>Total</h6>
+              </div>
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <h6>&#8377;{{createBillService.subTotal}}</h6>
+              </div>
+            </div>
+            <div class="row" style="border-bottom:1px solid black" *ngFor="let first of createBillService.currentTaxDisplayList">
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">{{first.HSNCode}}</div>
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <div class="row" *ngFor="let second of first.TaxBreakup">
+                  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    {{second.TaxBreakup}}
+                  </div>
+                </div>
+              </div>
+              <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+                <div class="row" *ngFor="let third of first.TaxBreakup">
+                  <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    &#8377;{{third.Amount | number: '1.2-2'}}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h4>Grand Total &#8377;{{createBillService.grandTotal | number: '1.2-2'}}</h4>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <h4 class="text-success">Outstanding Amount &#8377;{{createBillService.outstandingAmount | number: '1.2-2'}}</h4>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <div class="form-group">
+              <label>Advance Payment</label>
+              <input [(ngModel)]="createBillService.tradeSource" type="checkbox" name="Advance" (change)="ShowTextBox($event)" />
+            </div>
+          </div>
+          <ng-container *ngIf="createBillService.showAdvanceAmount == true">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+              <div class="form-group">
+                <input type="text" [(ngModel)]="createBillService.advancePayment" class="form-control" (change)="createBillService.CalculateSubTotal()" placeholder="Enter the Amount" name="AdvanceAmount" />
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="form-group form-submit">
+              <button type="submit" class="btn btn-block" data-toggle="modal" data-target="#divCreateBillModal"  style="color: white; background: #000066;"><span>Create Bill</span></button>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container> 
+<ng-container *ngIf="createBillService.isRentInvoice == true">
+
+  <div class="row" style="padding-top:2%;">
+    <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align:left">
+      <input (change)="createBillService.CalculateSubTotal()" [(ngModel)]="createBillService.isIGSTBill" type="checkbox" name="IsIGST" /><label class="text-info">Click here for IGST</label>
+    </div>
+    <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9" style="text-align:right">
+      <button data-target="#divResetModal" data-toggle="modal" type="button" class="btn btn-sm"  style="color: #000066; border: 1px solid #000066;"><span>Reset Values</span></button>
+    </div>
+  </div>
+  <form id="frmBill" class="validate-form">
+    <div class="row">
+      <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+        <div class="form-group">
+          <label>Bill Type</label>
+          <select name="BillType" [(ngModel)]="createBillService.billType" class="form-control">
+            <option value="-1">Choose the Bill Type</option>
+            <option value="1">Invoice</option>
+            <option value="2">Performa Invoice</option>
+          </select>
+        </div>
+      </div>
+      <div class="col-xs-8 col-sm-8 col-md-8 col-lg-8">
+        <div class="form-group">
+          <label>Client</label>
+          <select (change)="createBillService.GetClientInfo()" name="ChosenClient" [(ngModel)]="createBillService.clientKey" class="form-control" name="Client">
+            <option value="-1">Choose your Client</option>
+            <option *ngFor='let client of createBillService.clientList' value="{{client.Key}}">{{client.Name}}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <form id="frmAddItem" class="validate-form">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div class="form-group">
+            <label>Item</label>
+            <select [(ngModel)]="createBillService.currentItemKey" class="form-control" name="Item">
+              <option value="-1">Choose your Item</option>
+              <option *ngFor='let item of createBillService.itemList' value="{{item.Key}}">{{item.Name}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div class="form-group form-submit">
+            <button (click)="createBillService.ResetRentDuration()" data-target="#divRentInfoModal"  data-toggle="modal" type="submit" class="btn btn-block" style="color: white; background: #000066;"><span>Add Item</span></button>
+
+          </div>
+        </div>
+      </div>
+    </form>
+  </form>
+  <ng-container *ngIf="createBillService.isClientSelected == true">
+      <div class="row" style="border-top: 0.5px solid #000066;">
+          <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9" style="text-align: left;">
+              <h4 style="font-family: Oswald;font-style: italic;padding-top: 3%;">
+                  Billed to - {{createBillService.billObj.ClientName}} 
+              </h4>
+            </div>
+            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3" style="text-align: right;">
+                <label style="padding-top: 3%;" [(ngModel)]="createBillService.todayDate">{{today | date: 'dd/MM/yyyy'}}</label>
+            </div>
+          </div>
+            <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align: left;;">
+                <label style="font-family: Oswald;font-style: italic;">
+                    <strong>Party's GST:</strong> <i>{{createBillService.billObj.ClientGSTNmber}}</i>
+                  </label>
+              </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <div class="form-group">
+                  <label>DC Number</label>
+                  <input [(ngModel)]="createBillService.DCNum" type="text" class="form-control" name="DC_No" value="0" />
+                </div>
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                  <div class="form-group">
+                    <label>PO/WO Number</label>
+                    <input [(ngModel)]="createBillService.POWONum" type="text" name="PO_WO_Number" class="form-control"/>
+                  </div>
+                </div>
+        </div>
+            <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group">
+                  <label>Site Name</label>
+                  <textarea type="text" [(ngModel)]="createBillService.SiteName" name="SiteName" class="form-control"></textarea>
+                </div>  
+                </div>
+                </div>
+    <!-- <div class="row">
+      <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7" style="text-align:left;">
+        <i>Bill To,</i>
+
+        <h4>{{createBillService.billObj.ClientName}}</h4>
+        <h6>{{createBillService.billObj.ClientAddressLine1}}</h6>
+
+        <h6>{{createBillService.billObj.ClientAddressLine2}}</h6>
+
+        <h6>{{createBillService.billObj.ClientCity}}, {{createBillService.billObj.ClientPincode }}</h6>
+      </div>
+       <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="border-bottom:1px solid black;">
+            <strong>GSTIN: {{createBillService.billObj.GSTNumber}}</strong>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+            Date
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+            <label [(ngModel)]="createBillService.todayDate">{{today | date: 'dd/MM/yyyy'}}</label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+            DC No.
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+            <input [(ngModel)]="createBillService.DCNum" type="text" name="DC_No" value="0" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+            Site Name
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+            <textarea [(ngModel)]="createBillService.SiteName" name="SiteName"> </textarea>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid white;border-right:1px solid black;">
+            Party's GST No.
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+            {{createBillService.billObj.ClientGSTNmber}}
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;background:black;color:white;border-bottom:1px solid black;border-right:1px solid black;">
+            PO/WO Number
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="padding:3%;border-bottom:1px solid black;border-right:1px solid black;">
+            <input [(ngModel)]="createBillService.POWONum" type="text" name="PO_WO_Number" />
+          </div>
+        </div>
+      </div> 
+    </div> -->
+  </ng-container>
+  <ng-container *ngIf="createBillService.selectedItemList.length > 0">
+    <div class="row">
+      <table class="table-cart">
+        <tbody>
+          <tr style="background:black;color:white;">
+            <th style="text-align:center !important;">Names</th>
+            <th style="text-align:center !important;">Quantity</th>
+            <th style="text-align:center !important;">Scale</th>
+            <th style="text-align:center !important;">HSN Code</th>
+            <th style="text-align:center !important;">Total Days</th>
+            <th style="text-align:center !important;">Rate</th>
+            <th style="text-align:center !important;"></th>
+          </tr>
+          <tr *ngFor='let selectedItem of createBillService.selectedItemList' style="text-align:center;">
+            <td>{{selectedItem.Name}}</td>
+            <td><a (click)="IncreementQuantity(selectedItem.Key)"><i class="ti ti-plus"></i></a> {{selectedItem.Quantity}} <a (click)="DecreementQuantity(selectedItem.Key)"><i class="ti ti-minus"></i></a></td>
+            <td><select name="Scale" (change)="createBillService.UpdateItemScale(selectedItem.Key, $event)" class="form-control">
+              <option value="No">No</option>
+              <option value="Nos">Nos</option>
+              <option value="Month">Month</option>
+              <option value="Days">Days</option>
+              <option value="Set">Set</option>
+              <option value="Mtr">Mtr</option>
+              <option value="Kg">Kg</option>
+              </select></td>
+            <td>{{selectedItem.HSNCode}}</td>
+            <td>{{selectedItem.TotalRentDays}}</td>
+            <td><input (change)="createBillService.UpdateItemRate(selectedItem.Key, $event)" type="number" name="ItemRate" class="form-control" value="{{selectedItem.RentRate}}" />  </td>
+            <td><a (click)="DeleteItem(selectedItem.Key)"><i class="ti ti-close"></i></a></td>
+          </tr>
+      </table>
+    </div>
+    <div class="row" style="padding-top:3%">
+      <div class="col-xs-5 col-sm-5 col-md-5 col-lg-5" style="padding-top:5%;background: #000066;color:white;">
+        {{createBillService.GrandTotalInWords}}
+      </div>
+      <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
+        <div class="row" style="border-bottom:1px solid black;padding-top:5%;background:#000066;color:white;">
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h6>HSN/SAC</h6>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h6>Total</h6>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <h6>&#8377;{{createBillService.subTotal}}</h6>
+          </div>
+        </div>
+        <div class="row" style="border-bottom:1px solid black" *ngFor="let first of createBillService.currentTaxDisplayList">
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">{{first.HSNCode}}</div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div class="row" *ngFor="let second of first.TaxBreakup">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                {{second.TaxBreakup}}
+              </div>
+            </div>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4">
+            <div class="row" *ngFor="let third of first.TaxBreakup">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                &#8377;{{third.Amount | number: '1.2-2'}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h4>Grand Total &#8377;{{createBillService.grandTotal | number: '1.2-2'}}</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h4 class="text-success">Outstanding Amount &#8377;{{createBillService.outstandingAmount | number: '1.2-2'}}</h4>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="form-group">
+          <label>Advance Payment</label>
+          <input [(ngModel)]="createBillService.tradeSource" type="checkbox" name="Advance" (change)="ShowTextBox($event)" />
+        </div>
+      </div>
+      <ng-container *ngIf="createBillService.showAdvanceAmount == true">
+        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+          <div class="form-group">
+            <input type="text" [(ngModel)]="createBillService.advancePayment" class="form-control" (change)="createBillService.CalculateSubTotal()" placeholder="Enter the Amount" name="AdvanceAmount" />
+          </div>
+        </div>
+      </ng-container>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="form-group form-submit">
+          <button type="submit" class="btn btn-block" data-toggle="modal" data-target="#divCreateBillModal" style="color: white; background: #000066;"><span>Create Bill</span></button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-container>
+<ng-container *ngIf="createBillService.isPurchaseInvoice == true">
+    <div class="row" style="padding-top:2%;">
+    
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="text-align:right">
+          <button (click)="addPurchaseInvoiceForm.resetForm()" type="button" class="btn btn-sm"  style="color: #000066; border: 1px solid #000066;"><span>Reset Values</span></button>
+        </div>
+      </div>
+      <form id="frmAddPurchaseInvoice" class="validate-form" style=" padding-top: 12px;" #addPurchaseInvoiceForm="ngForm" >
+          <div class="form-group">
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Client Name*</label>
+                <input [(ngModel)]="createBillService.purchaseItem.ClientName" name="ClientName" type="text" class="form-control" required #name="ngModel"> 
+                <div *ngIf="!name.valid && name.touched" class="alert alert-danger">
+                  <div *ngIf="name.hasError('required') && name.touched">Client Name is required</div>
+                </div>
+             </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Invoice Number</label>
+                <input [(ngModel)]="createBillService.purchaseItem.PONumber" name="PO_Number" type="text" class="form-control" #poNumber="ngModel">
+                
+              </div>
+            </div>
+    
+          </div>
+    
+          <div class="form-group">
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Invoice Date</label>
+                <input [(ngModel)]="createBillService.purchaseItem.PODate" name="PODate" type="date" class="form-control" #poDate="ngModel">
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Invoice Amount</label>
+                <input [(ngModel)]="createBillService.purchaseItem.POAmount" name="POAmount" type="number" class="form-control">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="row">
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Invoice GST Amount</label>
+                <input [(ngModel)]="createBillService.purchaseItem.POGSTAmount" name="POGSTAmount" type="number" class="form-control"  #pOGSTAmount="ngModel">
+              </div>
+              <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+                <label>Grand Total</label>
+                <label class="form-control text-success">{{createBillService.purchaseItem.POAmount + createBillService.purchaseItem.POGSTAmount }}</label>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="form-group form-submit">
+                    <button type="submit" class="btn btn-block" style="color: white; background: #000066;" data-toggle="modal"  [disabled]="!addPurchaseInvoiceForm.form.valid" data-target="#divCreateBillModal"><span>Create Bill</span></button>
+                </div>
+              </div>
+            </div>
+                  
+        </form>
+</ng-container>
+  <ng-container *ngIf="createBillService.isOtherInvoice">
+    <form id="frmAddOtherInvoice" class="validate-form" style=" padding-top: 12px;" #frmAddOtherInvoice="ngForm" >
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <label>Expense Title*</label>
+            <input [(ngModel)]="createBillService.otherExpense.ExpenseTitle" name="ExpenseTitle" type="text" class="form-control"  required #expensetitle="ngModel"/>
+            <div *ngIf="!expensetitle.valid && expensetitle.touched" class="alert alert-danger">
+                <div *ngIf="expensetitle.hasError('required') && expensetitle.touched">Expense Title is required</div>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>CGST Amount*</label>
+            <input (change)="createBillService.CalculateGrandTotal()" [(ngModel)]="createBillService.otherExpense.CGSTAmount" name="CGSTAmount" type="number" class="form-control"   required #cgstAmount="ngModel"/>
+            <div *ngIf="!cgstAmount.valid && cgstAmount.touched" class="alert alert-danger">
+                <div *ngIf="cgstAmount.hasError('required') && cgstAmount.touched">CGST Amount is required</div>
+              </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>SGST Amount*</label>
+            <input (change)="createBillService.CalculateGrandTotal()" [(ngModel)]="createBillService.otherExpense.SGSTAmount" name="SGSTAmount" type="number" class="form-control"   required #sgstAmount="ngModel"/>
+            <div *ngIf="!sgstAmount.valid && sgstAmount.touched" class="alert alert-danger">
+                <div *ngIf="sgstAmount.hasError('required') && sgstAmount.touched">SGST Amount is required</div>
+              </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Sub Total*</label>
+            <input (change)="createBillService.CalculateGrandTotal()" [(ngModel)]="createBillService.otherExpense.SubTotal" name="SubTotal" type="number" class="form-control"   required #subtotalAmt="ngModel"/>
+            <div *ngIf="!subtotalAmt.valid && subtotalAmt.touched" class="alert alert-danger">
+                <div *ngIf="subtotalAmt.hasError('required') && subtotalAmt.touched">Sub Total is required</div>
+              </div>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+            <label>Grand Total</label>
+            <input [(ngModel)]="createBillService.otherExpense.GrandTotal" name="GrandTotal" type="number" class="form-control" />
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <textarea class="form-control" name="Description" [(ngModel)]="createBillService.otherExpense.Description" >
+
+            </textarea>
+            </div>
+        </div>
+      </div>
+      <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="form-group form-submit">
+                <button type="submit" class="btn btn-block" style="color: white; background: #000066;"  [disabled]="!frmAddOtherInvoice.form.valid" data-toggle="modal" data-target="#divCreateBillModal"><span>Create Bill</span></button>
+            </div>
+          </div>
+        </div>
+    </form>
+  </ng-container>
+   </ng-container> 
+  <app-loading-spinner *ngIf="showSpinner"></app-loading-spinner>
+  <ng-container *ngIf="createBillService.isAdded == true && showSpinner == false;">
+
+    
+    
+    
+    <div class="row" style="padding-top: 5%;">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-bottom:2%;">
+        <div class="row">
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: left;">
+              <ng-container *ngIf="createBillService.isPurchaseInvoice == false && createBillService.isOtherInvoice == false">
+            <button data-target="#divStamp" data-toggle="modal" type="submit" class="btn"  style="background: #000066;color: white;"><i class="ti ti-download"></i> <span>Download Invoice</span></button>
+          </ng-container>
+          </div>
+          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: right;">
+            <button (click)="ResetToNewInvoice()" type="submit" class="btn" style="background: #000066;color: white;"><i class="ti ti-plus"></i> <span>Create New Invoice</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<div class="modal fade" id="divCreateBillModal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <h4 class="modal-title" id="myModalLabel">Are you sure you want to Create the Bill?</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" style="border: 1px solid #000066; color: #000066;" data-dismiss="modal">No</button>
+        <button data-dismiss="modal" (click)="CreateBill()" type="button" class="btn" style="background: #000066;color: white;">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="divResetModal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <h4 class="modal-title" id="myModalLabel">Do you want to Reset the Form?</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" style="border: 1px solid #000066; color: #000066;" data-dismiss="modal">No</button>
+        <button data-dismiss="modal" (click)='ResetForm()' type="button" class="btn" style="background: #000066;color: white;">Yes</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="divStamp" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <h4 class="modal-title" id="myModalLabel">Do you need the stamp?</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="checkbox" name="isStamp" [(ngModel)]="isStamp" />Yes, I need the Stamp
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" style="color: #000066; border: 1px solid #000066;" data-dismiss="modal">Cancel</button>
+        <button data-dismiss="modal" (click)='DownloadInvoice()' type="button" class="btn" style="background: #000066;color: white;">Download</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="divRentInfoModal" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <h4 class="modal-title" id="myModalLabel">Please Enter the Rent Details</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><i class="ti-close"></i></button>
+      </div>
+      <div class="modal-body">
+          <div class="row">
+              <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+              <div class="form-group">
+                  <div class="row">
+                      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <label>Enter the Duration</label>
+                      </div>
+                  </div>
+                  <div class="row">
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                          <input [(ngModel)]="createBillService.currentFromDate"  class="form-control" type="date" name="RentDurationFrom" />
+                      </div>
+                      <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6" style="text-align: center;">
+                          <input [(ngModel)]="createBillService.currentToDate"  class="form-control" type="date" name="RentDurationTo" />
+                      </div>
+                  </div>
+                  <div *ngIf="createBillService.datepickerError != ''" class="alert alert-danger" >
+                     {{createBillService.datepickerError}}
+                    </div>
+              </div>
+              <div class="form-group">
+                  <button (click)='createBillService.AddDuration()' type="button" class="btn btn-block" style="background: #000066;color: white;">Add Duration</button>
+              </div>
+              </div>
+            </div>
+            <ng-container *ngIf="createBillService.rentDurations.length > 0">
+              <table class="table-cart">
+                  <tbody>
+                  <tr style="background:#000066;color:white;">
+                  <td>From</td>
+                    <td>To</td>
+                    <td>Operations</td>
+                    </tr>
+                  <tr *ngFor="let rentDuration of createBillService.rentDurations">
+                      <td>{{rentDuration.fromDate}}</td>
+                      <td>{{rentDuration.toDate}}</td>
+                      <td><a (click)="createBillService.RemoveDuration(rentDuration.indexValue)"><i class="ti ti-close"></i></a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ng-container>
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" style="color: #000066;border: 1px solid #000066;" data-dismiss="modal">Cancel</button>
+        <button data-dismiss="modal" (click)='createBillService.AddItem()' type="button" class="btn"  style="color: white; background: #000066;">Add Item</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style type="text/css">
+
+  .unselected-btn {
+    background: white !important;
+    border: 1px solid #000066 !important;
+    color: #000066 !important;
+}
+
+.selected-btn {
+    background: #000066 !important;
+    border: 1px solid #000066 !important;
+    color: white !important;
+}
+  </style>

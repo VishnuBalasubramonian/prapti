@@ -1,0 +1,16 @@
+import { Component } from '@angular/core';
+import { HomeComponent } from '../../app/Views/Home/home.component';
+
+
+@Component({
+  selector: 'inventory',
+  templateUrl: './inventory.component.html'
+})
+
+export class InventoryComponent {
+  isAddClient;
+  isEditClient;
+  constructor(private homeComponent: HomeComponent) {
+
+  }
+}
